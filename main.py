@@ -1,94 +1,30 @@
 import pygame
-import os
 import math
 import random
+from Field import Field
+from Player import Player
+from options import Options
 
+choose_pos = (Options.width/2, Options.height/2)
+Options.set_default_window_position()  
 
-WIDTH = 960
-HEIGHT = 1000
-FPS = 60
-BG = (26, 35, 126)
-DARK = (0, 0, 81)
-WHITE = (255, 255, 255)
-RED = (244, 67, 54)
-RED_200 = (239, 154, 154)
-GREEN = (0, 255, 0)
-BLUE = (33, 150, 243)
-
-MOVE_AREA = 0.02
-SPEED = 50
-move_field = set()
-
-choose_pos = (WIDTH/2, HEIGHT/2)
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (WIDTH,0)
-
-class Player(pygame.sprite.Sprite):
-    radius = 100
-    def __init__(self, pos):
-        pygame.sprite.Sprite.__init__(self)
-        size = 30
-        rad = size/2
-        self.pos = pos
-        self.image = pygame.Surface((size, size), pygame.SRCALPHA)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        pygame.draw.circle(self.image, BLUE, (rad, rad), rad)
-        
-    
-    def update(self):
-        self.rect.x += 5
-        if self.rect.left > WIDTH:
-            self.rect.right = 0
-    
-    def show_area(self):
-        pygame.draw.circle(field.image, BLUE, self.pos, self.radius, 1)
-
-class Field(pygame.sprite.Sprite):
-    def __init__(self):
-        self.dimens = (4000, 4000)
-        self.pos = [0, 0]
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface(self.dimens)
-        self.image.fill(DARK)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        
-    def move_left(self):
-        self.pos[0] = min(self.dimens[0]/2, self.pos[0] + SPEED)
-        self.rect.center = self.pos
-        
-    def move_right(self):
-        self.pos[0] = max(WIDTH-self.dimens[0]/2, self.pos[0] - SPEED)
-        self.rect.center = self.pos
-        
-    def move_top(self):
-        self.pos[1] = min(self.dimens[1]/2, self.pos[1] + SPEED) 
-        self.rect.center = self.pos
-        
-    def move_bot(self):
-        self.pos[1] = max(HEIGHT-self.dimens[1]/2, self.pos[1] - SPEED)
-        self.rect.center = self.pos
-        
 pygame.init()
 pygame.mixer.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("My Game")
-clock = pygame.time.Clock()
-players_sprites = pygame.sprite.Group()
-interface_sprites = pygame.sprite.Group()
+screen = pygame.display.set_mode((Options.width, Options.height))
 field = Field()
 
+pygame.display.set_caption("My Game")
+clock = pygame.time.Clock()
 
+players_sprites = pygame.sprite.Group()
+interface_sprites = pygame.sprite.Group()
 interface_sprites.add(field)
+
 for i in range(200):
     players_sprites.add(Player((
         random.randint(0, field.dimens[0]), 
         random.randint(0, field.dimens[1])
     )))
-
-def draw_sprites_areas(sprites):
-    for sp in sprites:
-        sp.show_area()
 
 
 def is_mouse_intersect_sprites(sprites):
@@ -103,10 +39,10 @@ def is_mouse_intersect_sprites(sprites):
     return False
 
 
-
+move_field = set()
 running = True
 while running:
-    screen.fill(BG)
+    screen.fill(Options.bg)
     interface_sprites.draw(screen)
     
     events = pygame.event.get()
@@ -118,32 +54,28 @@ while running:
             choose_pos = event.pos
             
             move_field = set()
-            if WIDTH*MOVE_AREA > event.pos[0]:
+            if Options.width*Options.move_area > event.pos[0]:
                 move_field.add(field.move_left)
-            if (WIDTH - WIDTH*MOVE_AREA) < event.pos[0]:
+            if (Options.width - Options.width*Options.move_area) < event.pos[0]:
                 move_field.add(field.move_right)
-            if HEIGHT*MOVE_AREA > event.pos[1]:
+            if Options.height*Options.move_area > event.pos[1]:
                 move_field.add(field.move_top)
-            if (HEIGHT - HEIGHT*MOVE_AREA) < event.pos[1]:
+            if (Options.height - Options.height*Options.move_area) < event.pos[1]:
                 move_field.add(field.move_bot)
     
     for move in move_field:
         move()
             
-            
-            
-    draw_sprites_areas(players_sprites)
+    for sp in players_sprites:
+        sp.show_area(field)
     if is_mouse_intersect_sprites(players_sprites):
-        pygame.draw.circle(screen, RED, choose_pos, 100, 2)
+        pygame.draw.circle(screen, Options.red, choose_pos, 100, 2)
     else:
-        pygame.draw.circle(screen, WHITE, choose_pos, 100, 2)
+        pygame.draw.circle(screen, Options.white, choose_pos, 100, 2)
 
-
-    
     players_sprites.draw(field.image)
-    clock.tick(FPS)
+    clock.tick(Options.fps)
     pygame.display.flip()
 
-pygame.quit()
-            
+pygame.quit()         
         

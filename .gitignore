@@ -1,2 +1,4 @@
 .venv
 .vscode
+todo.txt
+__pycache__
