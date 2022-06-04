@@ -7,7 +7,7 @@ import random
 WIDTH = 960
 HEIGHT = 1080
 FPS = 60
-BLACK = (0, 0, 0)
+BG = (26, 35, 126)
 DARK = (0, 0, 81)
 WHITE = (255, 255, 255)
 RED = (244, 67, 54)
@@ -34,16 +34,32 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = 0
     
     def show_area(self):
-        pygame.draw.circle(screen, BLUE, self.pos, self.radius, 1)
+        pygame.draw.circle(field.image, BLUE, self.pos, self.radius, 1)
+
+class Field(pygame.sprite.Sprite):
+    def __init__(self):
+        self.dimens = (500, 500)
+        self.pos = (round(WIDTH/2), round(HEIGHT/2))
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface(self.dimens)
+        self.image.fill(DARK)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
 
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("My Game")
 clock = pygame.time.Clock()
-all_sprites = pygame.sprite.Group()
-for i in range(10):
-    all_sprites.add(Player((random.randint(0, WIDTH), random.randint(0, HEIGHT))))
+players_sprites = pygame.sprite.Group()
+interface_sprites = pygame.sprite.Group()
+field = Field()
+interface_sprites.add(field)
+for i in range(4):
+    players_sprites.add(Player((
+        random.randint(0, field.dimens[0]), 
+        random.randint(0, field.dimens[1])
+    )))
 
 def draw_sprites_areas(sprites):
     for sp in sprites:
@@ -51,17 +67,21 @@ def draw_sprites_areas(sprites):
 
 
 def is_mouse_intersect_sprites(sprites):
+    x = round(choose_pos[0] - (field.pos[0] - (field.dimens[0]/2)))
+    x = max(0, min(x, field.dimens[0]))
+    y = round(choose_pos[1] - (field.pos[1] - (field.dimens[1]/2)))
+    y = max(0, min(y, field.dimens[1]))
+    
     for sp in sprites:
-        if math.hypot(choose_pos[0] - sp.pos[0]) < sp.radius and \
-            math.hypot(choose_pos[1] - sp.pos[1]) < sp.radius:
+        if math.hypot(x - sp.pos[0], y - sp.pos[1]) < sp.radius:
             return True
     return False
-         
 
 
 running = True
 while running:
-    screen.fill(BLACK)
+    screen.fill(BG)
+    interface_sprites.draw(screen)
     
     events = pygame.event.get()
     for event in events:
@@ -71,15 +91,15 @@ while running:
         if event.type == pygame.MOUSEMOTION:
             choose_pos = event.pos
             
-    draw_sprites_areas(all_sprites)
-    if is_mouse_intersect_sprites(all_sprites):
-        pygame.draw.circle(screen, RED, choose_pos, 100, 1)
+    draw_sprites_areas(players_sprites)
+    if is_mouse_intersect_sprites(players_sprites):
+        pygame.draw.circle(screen, RED, choose_pos, 100, 2)
     else:
-        pygame.draw.circle(screen, RED_200, choose_pos, 100, 1)
+        pygame.draw.circle(screen, WHITE, choose_pos, 100, 2)
 
 
     
-    all_sprites.draw(screen)
+    players_sprites.draw(field.image)
     clock.tick(FPS)
     pygame.display.flip()
 
