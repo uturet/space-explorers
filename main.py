@@ -1,121 +1,70 @@
 import pygame
-import math
-import random
+from options import Options as Opt
+from state import State
+from player import Player
+from seeder import seed_players
 
-from pyparsing import Opt
-from Field import Field
-from Player import Player
-from options import Options
 
-Options.set_default_window_position()  
+Opt.set_default_window_position()
+state = State()
 
-class Mouse:
-    pos = (Options.width/2, Options.height/2)
-
-    @property
-    def pos_x(self):
-        x = round(mouse.pos[0] - (field.pos[0] - (field.dimens[0]/2)))
-        return max(0, min(x, field.dimens[0]))
-    
-    @property
-    def pos_y(self):
-        y = round(mouse.pos[1] - (field.pos[1] - (field.dimens[1]/2)))
-        return max(0, min(y, field.dimens[1]))
-
-mouse = Mouse()
-clock = pygame.time.Clock()
-screen = pygame.display.set_mode((Options.width, Options.height))
-field = Field()
-
-players_sprites = pygame.sprite.Group()
-interface_sprites = pygame.sprite.Group()
-interface_sprites.add(field)
-
-def seed_players(count):
-    for i in range(count):
-        players_sprites.add(Player((
-            random.randint(0, field.dimens[0]), 
-            random.randint(0, field.dimens[1])
-        )))
-seed_players(200)
-
-def get_mouse_intersect_sprites(sprites):
-    int_sprites = set()
-    for sp in sprites:
-        if math.hypot(mouse.pos_x - sp.pos[0], mouse.pos_y - sp.pos[1]) < sp.radius:
-            int_sprites.add(sp)
-    return int_sprites
+seed_players(200, state.players_sprites, state.field)
 
 
 class EventHandler():
-    
+
     def mousemotion_handler(self, event):
         if event.type == pygame.MOUSEMOTION:
-            mouse.pos = event.pos
-            
-            move_field = set()
-            if Options.width*Options.move_area > event.pos[0]:
-                move_field.add(field.move_left)
-            if (Options.width - Options.width*Options.move_area) < event.pos[0]:
-                move_field.add(field.move_right)
-            if Options.height*Options.move_area > event.pos[1]:
-                move_field.add(field.move_top)
-            if (Options.height - Options.height*Options.move_area) < event.pos[1]:
-                move_field.add(field.move_bot)
-    
-    def mousebuttondown_handler(self, event, new_items):
+            state.mouse.pos = event.pos
+
+            state.move_field = set()
+            if Opt.width*Opt.move_area > event.pos[0]:
+                state.move_field.add(state.field.move_left)
+            if (Opt.width - Opt.width*Opt.move_area) < event.pos[0]:
+                state.move_field.add(state.field.move_right)
+            if Opt.height*Opt.move_area > event.pos[1]:
+                state.move_field.add(state.field.move_top)
+            if (Opt.height - Opt.height*Opt.move_area) < event.pos[1]:
+                state.move_field.add(state.field.move_bot)
+
+    def mousebuttondown_handler(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            new_items.add(Player)
+            state.new_items.add(Player)
+
 
 class Game(EventHandler):
-    
+
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption("My Game")
 
     def main_loop(self):
-        move_field = set()
-        new_items = set()
         running = True
-        
         while running:
-            screen.fill(Options.bg)
-            interface_sprites.draw(screen)
-            
+            state.update()
+
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
                 self.mousemotion_handler(event)
-                self.mousebuttondown_handler(event, new_items)
-                
-            for move in move_field:
-                move()
-                    
-            for sp in players_sprites:
-                sp.show_area(field)
-            
-            int_sprites = get_mouse_intersect_sprites(players_sprites)
-            if int_sprites:
-                pygame.draw.circle(screen, Options.red, mouse.pos, 100, 2)
-            else:
-                pygame.draw.circle(screen, Options.white, mouse.pos, 100, 2)
+                self.mousebuttondown_handler(event)
 
-            if new_items:
-                if int_sprites:
-                    color = Options.red
-                else:
-                    color = Options.white
-                for i in new_items:
-                    players_sprites.add(i((mouse.pos_x, mouse.pos_y), color))
-                new_items = set()
-            
-            players_sprites.draw(field.image)
-            clock.tick(Options.fps)
+            for move in state.move_field:
+                move()
+
+            self.draw()
             pygame.display.flip()
 
         pygame.quit()
+
+    def draw(self):
+        state.screen.fill(Opt.bg)
+        state.interface_sprites.draw(state.screen)
+        state.players_sprites.draw(state.field.image)
+        state.clock.tick(Opt.fps)
+
 
 if __name__ == "__main__":
     g = Game()

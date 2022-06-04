@@ -7,6 +7,8 @@ authors = ["cybenko.sergey <cybenko.sergey@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.6"
 pygame = "^2.1.2"
+flake8 = "^4.0.1"
+autopep8 = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 
