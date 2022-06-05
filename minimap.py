@@ -2,25 +2,25 @@ import pygame
 from config import Config
 
 
-class Radarmap(pygame.sprite.Sprite):
+class Minimap(pygame.sprite.Sprite):
     follow_mouse = False
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = pygame.Surface(
-            (Config.radarmapwidth, Config.radarmapheight))
+            (Config.minimapwidth, Config.minimapheight))
         self.paintmap()
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (0, Config.height)
-        self.factorx = Config.radarmapwidth * 1.0 / Config.bigmapwidth
-        self.factory = Config.radarmapheight * 1.0 / Config.bigmapheight
+        self.factorx = Config.minimapwidth * 1.0 / Config.bigmapwidth
+        self.factory = Config.minimapheight * 1.0 / Config.bigmapheight
 
     def paintmap(self):
         self.image.fill(Config.dark)
         pygame.draw.rect(
             self.image,
             (150, 0, 0),
-            (0, 0, Config.radarmapwidth, Config.radarmapheight),
+            (0, 0, Config.minimapwidth, Config.minimapheight),
             1
         )
 

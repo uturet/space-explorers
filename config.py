@@ -1,11 +1,12 @@
 import os
+from static.colors import MaterialColors
 
 
-class Config:
+class Config(MaterialColors):
     width = 960
     height = 1000
-    radarmapwidth = 200
-    radarmapheight = 200
+    minimapwidth = 200
+    minimapheight = 200
     bigmapwidth = 4000
     bigmapheight = 4000
     cornerpoint = [0, 0]

@@ -47,11 +47,11 @@ class Game(EventHandler):
 
         self.register_handler(pygame.MOUSEMOTION, state.bg.hanlde_mausemotion)
         self.register_handler(pygame.MOUSEBUTTONDOWN,
-                              state.radarmap.handle_mousebuttondown)
+                              state.minimap.handle_mousebuttondown)
         self.register_handler(pygame.MOUSEBUTTONUP,
-                              state.radarmap.handle_mousebuttonup)
+                              state.minimap.handle_mousebuttonup)
         self.register_handler(pygame.MOUSEMOTION,
-                              state.radarmap.handle_mousemotion)
+                              state.minimap.handle_mousemotion)
 
     def main_loop(self):
 

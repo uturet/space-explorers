@@ -1,7 +1,7 @@
 import pygame
 import math
 from config import Config
-from radarmap import Radarmap
+from minimap import Minimap
 
 
 class Mouse:
@@ -109,15 +109,15 @@ class State():
         self.gamegroup = pygame.sprite.Group()
 
         Background._layer = 1
-        Radarmap._layer = 9
+        Minimap._layer = 9
 
         Background.groups = (self.allgroup, self.gamegroup)
-        Radarmap.groups = (self.allgroup, self.intgroup)
+        Minimap.groups = (self.allgroup, self.intgroup)
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
         self.mouse = Mouse(self.bg)
-        self.radarmap = Radarmap()
+        self.minimap = Minimap()
 
         self.clock = pygame.time.Clock()
 
@@ -130,8 +130,8 @@ class State():
 
     def get_rect_intersect_sprites_by_pos(self, pos, sprites):
         for sp in sprites:
-            if abs(sp.rect.left - pos[0]) < Config.radarmapwidth and \
-                    abs(sp.rect.bottom - pos[1]) < Config.radarmapheight:
+            if abs(sp.rect.left - pos[0]) < Config.minimapwidth and \
+                    abs(sp.rect.bottom - pos[1]) < Config.minimapheight:
                 self.mouse_int_sprites.add(sp)
 
     def update(self):
