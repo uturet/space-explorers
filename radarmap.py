@@ -3,6 +3,7 @@ from config import Config
 
 
 class Radarmap(pygame.sprite.Sprite):
+    follow_mouse = False
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -40,6 +41,16 @@ class Radarmap(pygame.sprite.Sprite):
 
     def handle_mousebuttondown(self, state, event):
         if self in state.mouse_int_sprites:
+            self.follow_mouse = True
+            x = round(event.pos[0] / self.factorx)
+            y = round((event.pos[1] - self.rect.top) / self.factory)
+            state.bg.move(x, y)
+
+    def handle_mousebuttonup(self, state, event):
+        self.follow_mouse = False
+
+    def handle_mousemotion(self, state, event):
+        if self.follow_mouse and self in state.mouse_int_sprites:
             x = round(event.pos[0] / self.factorx)
             y = round((event.pos[1] - self.rect.top) / self.factory)
             state.bg.move(x, y)

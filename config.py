@@ -22,7 +22,7 @@ class Config:
     blue_light = (100, 181, 246)
 
     move_area = 0.02
-    speed = 30
+    speed = 50
 
     @classmethod
     def set_default_window_position(cls):

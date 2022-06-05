@@ -130,8 +130,8 @@ class State():
 
     def get_rect_intersect_sprites_by_pos(self, pos, sprites):
         for sp in sprites:
-            if abs(sp.rect.center[0] - pos[0]) < Config.radarmapwidth and \
-                    abs(sp.rect.center[1] - pos[1]) < Config.radarmapheight:
+            if abs(sp.rect.left - pos[0]) < Config.radarmapwidth and \
+                    abs(sp.rect.bottom - pos[1]) < Config.radarmapheight:
                 self.mouse_int_sprites.add(sp)
 
     def update(self):

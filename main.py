@@ -12,6 +12,7 @@ class EventHandler():
     handlers = {
         pygame.MOUSEMOTION: set(),
         pygame.MOUSEBUTTONDOWN: set(),
+        pygame.MOUSEBUTTONUP: set()
     }
 
     def mousemotion_handler(self, event):
@@ -23,6 +24,11 @@ class EventHandler():
     def mousebuttondown_handler(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             for handler in self.handlers[pygame.MOUSEBUTTONDOWN]:
+                handler(state, event)
+
+    def mousebuttonup_handler(self, event):
+        if event.type == pygame.MOUSEBUTTONUP:
+            for handler in self.handlers[pygame.MOUSEBUTTONUP]:
                 handler(state, event)
 
     def register_handler(self, type, handler):
@@ -42,6 +48,10 @@ class Game(EventHandler):
         self.register_handler(pygame.MOUSEMOTION, state.bg.hanlde_mausemotion)
         self.register_handler(pygame.MOUSEBUTTONDOWN,
                               state.radarmap.handle_mousebuttondown)
+        self.register_handler(pygame.MOUSEBUTTONUP,
+                              state.radarmap.handle_mousebuttonup)
+        self.register_handler(pygame.MOUSEMOTION,
+                              state.radarmap.handle_mousemotion)
 
     def main_loop(self):
 
@@ -55,6 +65,7 @@ class Game(EventHandler):
 
                 self.mousemotion_handler(event)
                 self.mousebuttondown_handler(event)
+                self.mousebuttonup_handler(event)
 
             state.update()
 
