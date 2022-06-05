@@ -43,7 +43,7 @@ class Background(pygame.sprite.Sprite):
         return self.rect.center
 
     def hanlde_mausemotion(self, state, event):
-        state.move_bg = set()
+        state.move_bg.clear()
         if Config.width*Config.move_area > event.pos[0]:
             state.move_bg.add(self.move_left)
         if (Config.width - Config.width*Config.move_area) < event.pos[0]:
@@ -79,20 +79,40 @@ class Background(pygame.sprite.Sprite):
                 self.rect.center[1] - Config.speed)
         )
 
+    def move(self, x, y):
+        x = -(x - round(self.dimens[0]/2) - round(Config.width/2))
+        y = -(y - round(self.dimens[1]/2) - round(Config.height/2))
 
-class State:
+        x = min(
+            round(self.dimens[0]/2),
+            max(Config.width - round(self.dimens[0]/2),
+                x)
+        )
+
+        y = min(
+            round(self.dimens[1]/2),
+            max(Config.height - round(self.dimens[1]/2),
+                y)
+        )
+
+        self.rect.center = (x, y)
+
+
+class State():
     move_bg = set()
     mouse_int_sprites = set()
 
     def __init__(self):
         self.allgroup = pygame.sprite.LayeredUpdates()
         self.bggroup = pygame.sprite.Group()
+        self.intgroup = pygame.sprite.Group()
+        self.gamegroup = pygame.sprite.Group()
 
         Background._layer = 1
         Radarmap._layer = 9
 
-        Background.groups = self.allgroup
-        Radarmap.groups = self.allgroup
+        Background.groups = (self.allgroup, self.gamegroup)
+        Radarmap.groups = (self.allgroup, self.intgroup)
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
@@ -103,18 +123,23 @@ class State:
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
 
-    def get_intersect_sprites_by_pos(self, pos, sprites):
-        int_sprites = set()
+    def get_circular_intersect_sprites_by_pos(self, pos, sprites):
         for sp in sprites:
             if math.hypot(pos[0] - sp.pos[0], pos[1] - sp.pos[1]) < sp.radius:
-                int_sprites.add(sp)
-        return int_sprites
+                self.mouse_int_sprites.add(sp)
+
+    def get_rect_intersect_sprites_by_pos(self, pos, sprites):
+        for sp in sprites:
+            if abs(sp.rect.center[0] - pos[0]) < Config.radarmapwidth and \
+                    abs(sp.rect.center[1] - pos[1]) < Config.radarmapheight:
+                self.mouse_int_sprites.add(sp)
 
     def update(self):
-        # self.mouse_int_sprites = self.get_intersect_sprites_by_pos(
-        #     self.mouse.bg_bos,
-        #     self.allgroup
-        # )
+        self.mouse_int_sprites.clear()
+        self.get_rect_intersect_sprites_by_pos(
+            self.mouse.pos,
+            self.intgroup
+        )
 
         self.screen.fill(Config.dark)
         self.allgroup.update(self)

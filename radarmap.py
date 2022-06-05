@@ -10,7 +10,7 @@ class Radarmap(pygame.sprite.Sprite):
             (Config.radarmapwidth, Config.radarmapheight))
         self.paintmap()
         self.rect = self.image.get_rect()
-        self.rect.topleft = (Config.width - Config.radarmapwidth, 0)
+        self.rect.bottomleft = (0, Config.height)
         self.factorx = Config.radarmapwidth * 1.0 / Config.bigmapwidth
         self.factory = Config.radarmapheight * 1.0 / Config.bigmapheight
 
@@ -37,3 +37,9 @@ class Radarmap(pygame.sprite.Sprite):
             round(-state.bg.rect.top * self.factory, 0),
             round(Config.width * self.factorx, 0),
             round(Config.height * self.factory, 0)), 1)
+
+    def handle_mousebuttondown(self, state, event):
+        if self in state.mouse_int_sprites:
+            x = round(event.pos[0] / self.factorx)
+            y = round((event.pos[1] - self.rect.top) / self.factory)
+            state.bg.move(x, y)

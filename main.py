@@ -1,8 +1,6 @@
 import pygame
 from config import Config
 from state import State
-from player import Player
-from radarmap import Radarmap
 from seeder import seed_players_rand
 
 Config.set_default_window_position()
@@ -42,6 +40,8 @@ class Game(EventHandler):
         pygame.init()
 
         self.register_handler(pygame.MOUSEMOTION, state.bg.hanlde_mausemotion)
+        self.register_handler(pygame.MOUSEBUTTONDOWN,
+                              state.radarmap.handle_mousebuttondown)
 
     def main_loop(self):
 
@@ -54,6 +54,7 @@ class Game(EventHandler):
                     running = False
 
                 self.mousemotion_handler(event)
+                self.mousebuttondown_handler(event)
 
             state.update()
 
