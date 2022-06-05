@@ -12,24 +12,34 @@ class EventHandler():
     handlers = {
         pygame.MOUSEMOTION: set(),
         pygame.MOUSEBUTTONDOWN: set(),
-        pygame.MOUSEBUTTONUP: set()
+        pygame.MOUSEBUTTONUP: set(),
+        pygame.MOUSEWHEEL: set(),
     }
 
-    def mousemotion_handler(self, event):
-        if event.type == pygame.MOUSEMOTION:
-            state.mouse.pos = event.pos
-            for handler in self.handlers[pygame.MOUSEMOTION]:
-                handler(state, event)
+    handler_names = {
+        pygame.MOUSEMOTION: 'handle_mousemotion',
+        pygame.MOUSEBUTTONDOWN: 'handle_mousebuttondown',
+        pygame.MOUSEBUTTONUP: 'handle_mousebuttonup',
+        pygame.MOUSEWHEEL: 'handle_mousewheel',
+    }
 
-    def mousebuttondown_handler(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            for handler in self.handlers[pygame.MOUSEBUTTONDOWN]:
-                handler(state, event)
+    def handle_mousemotion(self, handlers, event):
+        state.mouse.pos = event.pos
+        for handler in handlers:
+            handler(state, event)
 
-    def mousebuttonup_handler(self, event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            for handler in self.handlers[pygame.MOUSEBUTTONUP]:
-                handler(state, event)
+    def handle_defualt(self, handlers, event):
+        for handler in handlers:
+            handler(state, event)
+
+    def handle_event(self, event):
+        for type in self.handlers:
+            if event.type == type:
+                if not hasattr(self, self.handler_names[type]):
+                    self.handle_defualt(self.handlers[type], event)
+                    continue
+                getattr(self, self.handler_names[type])(
+                    self.handlers[type], event)
 
     def register_handler(self, type, handler):
         if type in self.handlers:
@@ -39,19 +49,18 @@ class EventHandler():
         if type in self.handlers and handler in self.handlers[type]:
             self.handlers[type].remove(handler)
 
+    def detect_handlers(self, sprites):
+        for type, name in self.handler_names.items():
+            for sp in sprites:
+                if hasattr(sp, name):
+                    self.register_handler(type, getattr(sp, name))
+
 
 class Game(EventHandler):
 
     def __init__(self):
         pygame.init()
-
-        self.register_handler(pygame.MOUSEMOTION, state.bg.hanlde_mausemotion)
-        self.register_handler(pygame.MOUSEBUTTONDOWN,
-                              state.minimap.handle_mousebuttondown)
-        self.register_handler(pygame.MOUSEBUTTONUP,
-                              state.minimap.handle_mousebuttonup)
-        self.register_handler(pygame.MOUSEMOTION,
-                              state.minimap.handle_mousemotion)
+        self.detect_handlers(state.uigroup)
 
     def main_loop(self):
 
@@ -59,13 +68,12 @@ class Game(EventHandler):
 
         running = True
         while running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            for event in events:
                 if event.type == pygame.QUIT:
                     running = False
 
-                self.mousemotion_handler(event)
-                self.mousebuttondown_handler(event)
-                self.mousebuttonup_handler(event)
+                self.handle_event(event)
 
             state.update()
 

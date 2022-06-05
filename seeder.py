@@ -1,5 +1,7 @@
 import random
-from player import Player
+from game_objects.player import Player
+import pygame
+from config import Config
 
 
 def seed_players_rand(count, state):
@@ -8,6 +10,17 @@ def seed_players_rand(count, state):
             random.randint(0, state.bg.dimens[0]),
             random.randint(0, state.bg.dimens[1])
         ), state.bg.image))
+
+
+def seed_players_rand_static(count, sprite):
+    for i in range(count):
+        image = pygame.Surface((10, 10))
+        image.fill(Config.red)
+        pos = (
+            random.randint(0, sprite.rect.width),
+            random.randint(0, sprite.rect.height)
+        )
+        sprite.image.blit(image, pos)
 
 
 def fill_players(size, state):

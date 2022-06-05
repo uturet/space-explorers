@@ -10,6 +10,7 @@ class State():
 
     def __init__(self):
         self.allgroup = pygame.sprite.LayeredUpdates()
+        self.uigroup = pygame.sprite.Group()
         self.bggroup = pygame.sprite.Group()
         self.intgroup = pygame.sprite.Group()
         self.gamegroup = pygame.sprite.Group()
@@ -18,9 +19,9 @@ class State():
         Minimap._layer = 9
         Hotbar._layer = 9
 
-        Hotbar.groups = (self.allgroup, self.gamegroup)
-        Background.groups = (self.allgroup, self.gamegroup)
-        Minimap.groups = (self.allgroup, self.intgroup)
+        Hotbar.groups = (self.allgroup, self.uigroup)
+        Background.groups = (self.allgroup, self.uigroup)
+        Minimap.groups = (self.allgroup, self.uigroup)
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
@@ -38,20 +39,20 @@ class State():
 
     def get_rect_intersect_sprites_by_pos(self, pos, sprites):
         for sp in sprites:
-            if abs(sp.rect.left - pos[0]) < Config.minimapwidth and \
-                    abs(sp.rect.bottom - pos[1]) < Config.minimapheight:
+            if sp.rect.left < pos[0] < sp.rect.right and \
+                    sp.rect.top < pos[1] < sp.rect.bottom:
                 self.mouse_int_sprites.add(sp)
 
     def update(self):
         self.mouse_int_sprites.clear()
         self.get_rect_intersect_sprites_by_pos(
             self.mouse.pos,
-            self.intgroup
+            self.uigroup
         )
 
         self.screen.fill(Config.dark)
         self.allgroup.update(self)
-        self.allgroup.draw(self.screen)
+        self.uigroup.draw(self.screen)
 
         self.bggroup.update()
 

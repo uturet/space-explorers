@@ -17,7 +17,7 @@ class Background(pygame.sprite.Sprite):
     def pos(self):
         return self.rect.center
 
-    def hanlde_mausemotion(self, state, event):
+    def handle_mousemotion(self, state, event):
         state.move_bg.clear()
         if Config.width*Config.move_area > event.pos[0]:
             state.move_bg.add(self.move_left)

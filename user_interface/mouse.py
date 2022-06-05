@@ -20,5 +20,5 @@ class Mouse:
         return max(0, min(y, self._bg.dimens[1]))
 
     @property
-    def bg_bos(self):
+    def bg_pos(self):
         return (self.pos_x, self.pos_y)

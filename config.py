@@ -3,7 +3,7 @@ from static.colors import MaterialColors
 
 
 class Config(MaterialColors):
-    width = 1920
+    width = 960
     height = 1000
     minimapwidth = 200
     minimapheight = 200
@@ -26,6 +26,7 @@ class Config(MaterialColors):
 
     move_area = 0.02
     speed = 50
+    scroll_speed = 30
 
     @classmethod
     def set_default_window_position(cls):
