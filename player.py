@@ -1,25 +1,34 @@
 import pygame
-from options import Options as Opt
+from config import Config
+import itertools
+import random
 
 
 class Player(pygame.sprite.Sprite):
     radius = 100
 
-    def __init__(self, pos, color=Opt.blue):
+    def __init__(self, pos, background):
         pygame.sprite.Sprite.__init__(self)
-        self.color = color
+
+        self.background = background
+        self.color = Config.blue
+        self.colors = itertools.cycle(
+            (Config.blue_light, Config.blue, Config.blue_dark, Config.blue))
+        self.last_update = pygame.time.get_ticks()
+        self.animation_cooldown = random.randint(500, 2000)
         size = 30
-        rad = size/2
+        self.rad = size/2
         self.pos = pos
-        self.image = pygame.Surface((size, size), pygame.SRCALPHA)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.pos
-        pygame.draw.circle(self.image, self.color, (rad, rad), rad)
+
+        pygame.draw.circle(self.background, next(
+            self.colors), pos, self.rad)
 
     def update(self):
-        self.rect.x += 5
-        if self.rect.left > Opt.width:
-            self.rect.right = 0
+        cur_time = pygame.time.get_ticks()
+        if cur_time - self.last_update >= self.animation_cooldown:
+            pygame.draw.circle(self.background, next(
+                self.colors), self.pos, self.rad)
+            self.last_update = cur_time
 
     def show_area(self, field):
         pygame.draw.circle(field.image, self.color, self.pos, self.radius, 1)
