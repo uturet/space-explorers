@@ -1,101 +1,7 @@
 import pygame
 import math
 from config import Config
-from minimap import Minimap
-
-
-class Mouse:
-    pos = (Config.width/2, Config.height/2)
-
-    def __init__(self, bg):
-        self._bg = bg
-
-    @property
-    def pos_x(self):
-        x = round(
-            self.pos[0] - (self._bg.pos[0] - (self._bg.dimens[0]/2)))
-        return max(0, min(x, self._bg.dimens[0]))
-
-    @property
-    def pos_y(self):
-        y = round(
-            self.pos[1] - (self._bg.pos[1] - (self._bg.dimens[1]/2)))
-        return max(0, min(y, self._bg.dimens[1]))
-
-    @property
-    def bg_bos(self):
-        return (self.pos_x, self.pos_y)
-
-
-class Background(pygame.sprite.Sprite):
-
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-
-        self.dimens = (Config.bigmapwidth, Config.bigmapheight)
-        self.image = pygame.Surface(self.dimens)
-        self.image.fill(Config.bg)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (0, 0)
-
-    @property
-    def pos(self):
-        return self.rect.center
-
-    def hanlde_mausemotion(self, state, event):
-        state.move_bg.clear()
-        if Config.width*Config.move_area > event.pos[0]:
-            state.move_bg.add(self.move_left)
-        if (Config.width - Config.width*Config.move_area) < event.pos[0]:
-            state.move_bg.add(self.move_right)
-        if Config.height*Config.move_area > event.pos[1]:
-            state.move_bg.add(self.move_top)
-        if (Config.height - Config.height*Config.move_area) < event.pos[1]:
-            state.move_bg.add(self.move_bot)
-
-    def move_left(self):
-        self.rect.center = (
-            min(round(self.dimens[0]/2), self.rect.center[0] + Config.speed),
-            self.rect.center[1]
-        )
-
-    def move_right(self):
-        self.rect.center = (
-            max(Config.width - round(self.dimens[0]/2),
-                self.rect.center[0] - Config.speed),
-            self.rect.center[1]
-        )
-
-    def move_top(self):
-        self.rect.center = (
-            self.rect.center[0],
-            min(round(self.dimens[1]/2), self.rect.center[1] + Config.speed)
-        )
-
-    def move_bot(self):
-        self.rect.center = (
-            self.rect.center[0],
-            max(Config.height - round(self.dimens[1]/2),
-                self.rect.center[1] - Config.speed)
-        )
-
-    def move(self, x, y):
-        x = -(x - round(self.dimens[0]/2) - round(Config.width/2))
-        y = -(y - round(self.dimens[1]/2) - round(Config.height/2))
-
-        x = min(
-            round(self.dimens[0]/2),
-            max(Config.width - round(self.dimens[0]/2),
-                x)
-        )
-
-        y = min(
-            round(self.dimens[1]/2),
-            max(Config.height - round(self.dimens[1]/2),
-                y)
-        )
-
-        self.rect.center = (x, y)
+from user_interface import Minimap, Background, Mouse, Hotbar
 
 
 class State():
@@ -110,17 +16,19 @@ class State():
 
         Background._layer = 1
         Minimap._layer = 9
+        Hotbar._layer = 9
 
+        Hotbar.groups = (self.allgroup, self.gamegroup)
         Background.groups = (self.allgroup, self.gamegroup)
         Minimap.groups = (self.allgroup, self.intgroup)
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
+        self.hotbar = Hotbar()
         self.mouse = Mouse(self.bg)
         self.minimap = Minimap()
 
         self.clock = pygame.time.Clock()
-
         self.screen = pygame.display.set_mode((Config.width, Config.height))
 
     def get_circular_intersect_sprites_by_pos(self, pos, sprites):

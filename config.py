@@ -3,10 +3,12 @@ from static.colors import MaterialColors
 
 
 class Config(MaterialColors):
-    width = 960
+    width = 1920
     height = 1000
     minimapwidth = 200
     minimapheight = 200
+    hotbarwidth = 500
+    hotbarheight = 150
     bigmapwidth = 4000
     bigmapheight = 4000
     cornerpoint = [0, 0]
