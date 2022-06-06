@@ -1,5 +1,5 @@
 import pygame
-
+from abc import ABC, abstractclassmethod
 from core.config import Config
 
 
@@ -14,6 +14,44 @@ class Building(pygame.sprite.Sprite):
         self.rect = self._image.get_rect()
         self.rect.center = pos
 
+    @classmethod
+    def get_option_image(cls):
+        pass
+
+    @classmethod
+    def get_preview_image(cls):
+        pass
+
+
+class Preview(ABC):
+    building = None
+
+    cover_size = 0
+    cover_radius = 0
+    option_radius = 0
+
+    color = Config.black
+    preview_color = Config.black
+
+    def __init__(self):
+        self.option_image = self.get_option_image()
+        self.preview_image = self.get_preview_image()
+
+        self.option_rect = self.option_image.get_rect()
+        self.preview_rect = self.preview_image.get_rect()
+
+    @abstractclassmethod
+    def get_option_image(self):
+        pass
+
+    @abstractclassmethod
+    def get_preview_image(self):
+        pass
+
+    @abstractclassmethod
+    def handle_collisions(self, state, collisions):
+        pass
+
 
 class Particle(pygame.sprite.Sprite):
     pos = [0, 0]
@@ -25,7 +63,7 @@ class Particle(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
 
     def update(self):
-        """Collision Devection"""
+        """Collision Detection"""
         self.vel[0] += self.accel[0] * self.dt
         self.pos[0] += self.vel[0] * self.dt
 

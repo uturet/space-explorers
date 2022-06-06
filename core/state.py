@@ -3,10 +3,10 @@ from core.config import Config
 from user_interface import Minimap, Background, Mouse, MouseTracker, Hotbar
 from game_objects import Transmitter
 from core.livecycle_manager import LiveCicleManager
-from core.collision_handler import CollisionHandler
+from core import collision_handler as ch
 
 
-class State(LiveCicleManager, CollisionHandler):
+class State(LiveCicleManager):
     move_bg = set()
     mouse_int_sprites = set()
 
@@ -33,16 +33,24 @@ class State(LiveCicleManager, CollisionHandler):
         self.detect_handlers(self.interactable_group)
         self.detect_handlers(self.gamegroup)
 
-    def update(self):
-        self.calculate_mouse_int_sprites()
+    def calculate_mouse_int_sprites(self):
+        self.mouse_int_sprites.clear()
 
-        self.allgroup.update(self)
-
-        self.uigroup.draw(self.screen)
-        self.bggroup.draw(self.bg.image)
-
-        for move in self.move_bg:
-            move()
+        ch.get_rect_intersect_sprites_by_pos(
+            self.mouse.pos,
+            self.uigroup,
+            self.mouse_int_sprites
+        )
+        ch.get_rect_intersect_sprites_by_pos(
+            self.mouse.pos,
+            self.interactable_group,
+            self.mouse_int_sprites
+        )
+        ch.get_rect_intersect_sprites_by_pos(
+            self.mouse.bg_pos,
+            self.gamegroup,
+            self.mouse_int_sprites
+        )
 
     def set_group_attachmet(self):
         Transmitter._layer = 3
@@ -58,3 +66,14 @@ class State(LiveCicleManager, CollisionHandler):
         Hotbar.groups = (self.allgroup, self.uigroup)
         Background.groups = (self.allgroup, self.uigroup)
         Minimap.groups = (self.allgroup, self.uigroup)
+
+    def update(self):
+        self.calculate_mouse_int_sprites()
+
+        self.allgroup.update(self)
+
+        self.uigroup.draw(self.screen)
+        self.bggroup.draw(self.bg.image)
+
+        for move in self.move_bg:
+            move()

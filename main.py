@@ -29,7 +29,7 @@ class Game:
     def draw(self):
         pygame.display.set_caption(str(self.state.clock.get_fps()))
         pygame.display.flip()
-        self.state.clock.tick(Config.fps*100)
+        self.state.clock.tick(Config.fps)
 
 
 if __name__ == "__main__":

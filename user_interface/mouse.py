@@ -1,5 +1,6 @@
 from core.config import Config
 import pygame
+from core import collision_handler as ch
 
 
 class Mouse:
@@ -20,6 +21,14 @@ class Mouse:
             self.pos[1] - (self._bg.pos[1] - (self._bg.dimens[1]/2)))
         return max(0, min(y, self._bg.dimens[1]))
 
+    def bg_pos_to_abs(self, pos):
+        x = round(
+            pos[0] + (self._bg.pos[0] - (self._bg.dimens[0]/2)))
+
+        y = round(
+            pos[1] + (self._bg.pos[1] - (self._bg.dimens[1]/2)))
+        return x, y
+
     @property
     def bg_pos(self):
         return (self.pos_x, self.pos_y)
@@ -31,23 +40,27 @@ class MouseTracker(pygame.sprite.Sprite):
     preview = None
     preview_rect = None
     groups = ()
+    collisions = set()
+    sprite_type = None
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
-
         self.dimens = (Config.mouse_tracker_width, Config.mouse_tracker_height)
-        self._image = pygame.Surface(self.dimens, pygame.SRCALPHA)
-        self.rect = self._image.get_rect()
+        self.image = pygame.Surface(self.dimens, pygame.SRCALPHA)
+        self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
-        self.image = self._image.convert_alpha()
 
     def set_preview(self, preview, pos):
         self.is_active = True
+        self.image = pygame.Surface(
+            (preview.cover_size, preview.cover_size), pygame.SRCALPHA)
+        self.rect = self.image.get_rect()
         self.rect.center = pos
+
         self.preview = preview
-        self.preview_rect = preview.get_rect()
-        self._image.blit(preview, (0, 0))
-        self.image = self._image.convert_alpha()
+        self.preview_rect = preview.preview_image.get_rect()
+        self.preview.update_preview_image()
+        self.image.blit(self.preview.preview_image, (0, 0))
 
     def clear_preview(self):
         self.is_active = False
@@ -55,7 +68,14 @@ class MouseTracker(pygame.sprite.Sprite):
 
     def update(self, state):
         pass
+        if self.preview:
+            self.image.fill((255, 255, 255, 0))
+            self.preview.update_preview_image()
+            self.image.blit(self.preview.preview_image, (0, 0))
 
     def handle_mousemotion(self, state, event):
         if self.is_active:
             self.rect.center = event.pos
+            self.collisions.clear()
+            ch.rect_collides(self.rect, state.gamegroup, self.collisions)
+            self.preview.handle_collisions(state, self.collisions)
