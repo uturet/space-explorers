@@ -18,12 +18,9 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-
                 self.state.handle_event(event)
-
             self.state.update()
             self.draw()
-
         pygame.quit()
 
     def draw(self):

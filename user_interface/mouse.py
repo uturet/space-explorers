@@ -55,6 +55,7 @@ class MouseTracker(pygame.sprite.Sprite):
         self.image = pygame.Surface(
             (preview.cover_size, preview.cover_size), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
+        self.bg_rect = self.rect.copy()
         self.rect.center = pos
 
         self.preview = preview
@@ -68,14 +69,14 @@ class MouseTracker(pygame.sprite.Sprite):
 
     def update(self, state):
         pass
-        if self.preview:
-            self.image.fill((255, 255, 255, 0))
-            self.preview.update_preview_image()
-            self.image.blit(self.preview.preview_image, (0, 0))
 
     def handle_mousemotion(self, state, event):
         if self.is_active:
             self.rect.center = event.pos
+            self.bg_rect.center = state.mouse.bg_pos
             self.collisions.clear()
-            ch.rect_collides(self.rect, state.gamegroup, self.collisions)
+            ch.rect_collides(self.bg_rect, state.gamegroup, self.collisions)
             self.preview.handle_collisions(state, self.collisions)
+            self.image.fill((255, 255, 255, 0))
+            self.preview.update_preview_image()
+            self.image.blit(self.preview.preview_image, (0, 0))
