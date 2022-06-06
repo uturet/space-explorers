@@ -74,7 +74,12 @@ class BuildingSelector(pygame.sprite.Sprite, Node):
                 ((event.x+event.y) * Config.scroll_speed),
                 self.rect.center[1]
             )
-            state.calculate_mouse_int_sprites()
+
+            state.mouse_int_sprites.difference_update(self.options)
+            state.get_rect_intersect_sprites_by_pos(
+                state.mouse.pos,
+                self.options
+            )
 
 
 class InfoBar(pygame.sprite.Sprite, Node):
