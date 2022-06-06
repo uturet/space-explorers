@@ -9,9 +9,16 @@ class Background(pygame.sprite.Sprite):
 
         self.dimens = (Config.bigmapwidth, Config.bigmapheight)
         self.image = pygame.Surface(self.dimens)
-        self.image.fill(Config.bg)
+        self.paintbg()
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
+
+    def paintbg(self):
+        self.image.fill(Config.bg)
+
+    def update(self, state):
+        pass
+        # self.paintbg()
 
     @property
     def pos(self):

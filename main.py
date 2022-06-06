@@ -1,7 +1,6 @@
 import pygame
 from config import Config
 from state import State
-from seeder import seed_players_rand
 from ordered_set import OrderedSet
 
 Config.set_default_window_position()
@@ -65,9 +64,6 @@ class Game(EventHandler):
         self.detect_handlers(state.interactable_group)
 
     def main_loop(self):
-
-        seed_players_rand(10, state)
-
         running = True
         while running:
             events = pygame.event.get()
@@ -86,7 +82,7 @@ class Game(EventHandler):
     def draw(self):
         pygame.display.set_caption(str(state.clock.get_fps()))
         pygame.display.flip()
-        state.clock.tick(Config.fps)
+        state.clock.tick(Config.fps*100)
 
 
 if __name__ == "__main__":

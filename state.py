@@ -1,7 +1,7 @@
 import pygame
 import math
 from config import Config
-from user_interface import Minimap, Background, Mouse, Hotbar
+from user_interface import Minimap, Background, Mouse, MouseTracker, Hotbar
 from user_interface import Node
 
 
@@ -17,17 +17,20 @@ class State():
         self.gamegroup = pygame.sprite.Group()
 
         Background._layer = 1
+        MouseTracker._layer = 8
         Minimap._layer = 9
         Hotbar._layer = 9
 
+        MouseTracker.groups = (self.allgroup, self.uigroup)
         Hotbar.groups = (self.allgroup, self.uigroup)
         Background.groups = (self.allgroup, self.uigroup)
         Minimap.groups = (self.allgroup, self.uigroup)
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
-        self.hotbar = Hotbar(self.interactable_group)
         self.mouse = Mouse(self.bg)
+        self.mouse_tracker = MouseTracker(self.screen)
+        self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
 
         self.clock = pygame.time.Clock()
@@ -65,8 +68,6 @@ class State():
         self.screen.fill(Config.dark)
         self.allgroup.update(self)
         self.uigroup.draw(self.screen)
-
-        self.bggroup.update()
 
         for move in self.move_bg:
             move()

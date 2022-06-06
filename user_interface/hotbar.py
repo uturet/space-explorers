@@ -10,13 +10,16 @@ class SelectorOption(pygame.sprite.Sprite, Node):
     def __init__(self, building, shift, color, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         Node.__init__(self, parent)
+        self.hotbar_mod = Hotbar.BUILDING_SELECTOR
         self.is_hover = False
         self.is_active = False
 
         self.default_color = color
         self.hover_color = Config.purple_500
+        self.active_color = Config.blue_500
 
         self.building_image = building.get_option_image()
+        self.building_preview_image = building.get_preview_image()
         self.image = pygame.Surface(
             (Config.building_selector_height, Config.building_selector_height))
         self.rect = self.image.get_rect()
@@ -32,29 +35,40 @@ class SelectorOption(pygame.sprite.Sprite, Node):
             self.image.fill(self.default_color)
         self.image.blit(self.building_image, (0, 0))
 
-        if self.is_active:
-            pygame.draw.rect(self.image, Config.blue_500, self.rect, 2)
-
     def update(self, state):
         self.paintbar()
 
+        if self.is_active:
+            pygame.draw.rect(
+                self.image,
+                self.active_color,
+                self.rect,
+                4
+            )
+
     def handle_mousemotion(self, state, event):
-        if state.hotbar in state.mouse_int_sprites and \
-            state.hotbar.active_mod_index == state.hotbar.BUILDING_SELECTOR and \
-                self in state.mouse_int_sprites:
+        if (state.hotbar in state.mouse_int_sprites and
+            state.hotbar.active_mod_index == self.hotbar_mod and
+                self in state.mouse_int_sprites):
             self.is_hover = True
         elif self.is_hover:
             self.is_hover = False
 
     def handle_mousebuttonup(self, state, event):
         if event.button == 1:
-            if state.hotbar in state.mouse_int_sprites and \
-                state.hotbar.active_mod_index == state.hotbar.BUILDING_SELECTOR and \
-                    self in state.mouse_int_sprites:
+            if (state.hotbar in state.mouse_int_sprites and
+                state.hotbar.active_mod_index == self.hotbar_mod and
+                self in state.mouse_int_sprites and
+                    not self.is_active):
                 self.is_active = True
-            elif self.is_active and \
-                    state.minimap not in state.mouse_int_sprites:
+                state.mouse_tracker.set_preview(
+                    self.building_preview_image,
+                    state.mouse.pos
+                )
+            elif (self.is_active and
+                    state.minimap not in state.mouse_int_sprites):
                 self.is_active = False
+                state.mouse_tracker.clear_preview()
 
 
 class BuildingSelector(pygame.sprite.Sprite, Node):
@@ -62,13 +76,13 @@ class BuildingSelector(pygame.sprite.Sprite, Node):
     def __init__(self, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         Node.__init__(self, parent)
+        self.hotbar_mod = Hotbar.BUILDING_SELECTOR
 
         width = Config.building_selector_height * len(buildings)
         if width < Config.building_selector_width:
             width = Config.building_selector_width
         self.image = pygame.Surface(
-            (width, Config.building_selector_height)
-        )
+            (width, Config.building_selector_height))
         self.paintbar()
         self.rect = self.image.get_rect()
         self.rect.topleft = (10, 10)
@@ -92,8 +106,8 @@ class BuildingSelector(pygame.sprite.Sprite, Node):
         self.options.draw(self.image)
 
     def handle_mousewheel(self, state, event):
-        if state.hotbar in state.mouse_int_sprites and \
-                state.hotbar.active_mod_index == state.hotbar.BUILDING_SELECTOR:
+        if (state.hotbar in state.mouse_int_sprites and
+                state.hotbar.active_mod_index == self.hotbar_mod):
             self.rect.center = (
                 self.rect.center[0] +
                 ((event.x+event.y) * Config.scroll_speed),
@@ -112,6 +126,8 @@ class InfoBar(pygame.sprite.Sprite, Node):
     def __init__(self, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         Node.__init__(self, parent)
+        self.hotbar_mod = Hotbar.INFOBAR
+
         self.image = pygame.Surface(
             (Config.hotbarwidth, Config.hotbarheight - 20))
         self.paintbar()
@@ -125,9 +141,9 @@ class InfoBar(pygame.sprite.Sprite, Node):
         self.paintbar()
 
     def handle_mousewheel(self, state, event):
-        if state.hotbar in state.mouse_int_sprites and \
-            state.hotbar.active_mod_index == state.hotbar.INFOBAR and \
-                self in state.mouse_int_sprites:
+        if (state.hotbar in state.mouse_int_sprites and
+            state.hotbar.active_mod_index == self.hotbar_mod and
+                self in state.mouse_int_sprites):
             pass
 
 
@@ -136,6 +152,8 @@ class MultiInfoBar(pygame.sprite.Sprite, Node):
     def __init__(self, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         Node.__init__(self, parent)
+        self.hotbar_mod = Hotbar.MULTI_INFOBAR
+
         self.image = pygame.Surface(
             (Config.hotbarwidth, Config.hotbarheight - 20))
         self.paintbar()
@@ -149,9 +167,9 @@ class MultiInfoBar(pygame.sprite.Sprite, Node):
         self.paintbar()
 
     def handle_mousewheel(self, state, event):
-        if state.hotbar in state.mouse_int_sprites and \
-            state.hotbar.active_mod_index == state.hotbar.MULTI_INFOBAR and \
-                self in state.mouse_int_sprites:
+        if (state.hotbar in state.mouse_int_sprites and
+            state.hotbar.active_mod_index == self.hotbar_mod and
+                self in state.mouse_int_sprites):
             pass
 
 
