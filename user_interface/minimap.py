@@ -40,7 +40,7 @@ class Minimap(pygame.sprite.Sprite):
             round(Config.height * self.factory, 0)), 1)
 
     def handle_mousebuttondown(self, state, event):
-        if self in state.mouse_int_sprites:
+        if event.button == 1 and self in state.mouse_int_sprites:
             self.follow_mouse = True
             x = round(event.pos[0] / self.factorx)
             y = round((event.pos[1] - self.rect.top) / self.factory)

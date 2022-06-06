@@ -9,6 +9,10 @@ class Config(MaterialColors):
     minimapheight = 200
     hotbarwidth = 500
     hotbarheight = 150
+
+    building_selector_width = 480
+    building_selector_height = 130
+
     bigmapwidth = 4000
     bigmapheight = 4000
     cornerpoint = [0, 0]

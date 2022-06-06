@@ -2,19 +2,23 @@ import pygame
 from config import Config
 import itertools
 from user_interface.node import Node
+from game_objects.buildings import buildings
 
 
 class SelectorOption(pygame.sprite.Sprite, Node):
 
-    def __init__(self, size, shift, color, parent=None):
+    def __init__(self, building, shift, color, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         Node.__init__(self, parent)
         self.is_hover = False
+        self.is_active = False
 
         self.default_color = color
         self.hover_color = Config.purple_500
 
-        self.image = pygame.Surface((size, size))
+        self.building_image = building.get_option_image()
+        self.image = pygame.Surface(
+            (Config.building_selector_height, Config.building_selector_height))
         self.rect = self.image.get_rect()
         self.rect.left = shift
         self.paintbar()
@@ -26,6 +30,10 @@ class SelectorOption(pygame.sprite.Sprite, Node):
             self.image.fill(self.hover_color)
         else:
             self.image.fill(self.default_color)
+        self.image.blit(self.building_image, (0, 0))
+
+        if self.is_active:
+            pygame.draw.rect(self.image, Config.blue_500, self.rect, 2)
 
     def update(self, state):
         self.paintbar()
@@ -38,14 +46,28 @@ class SelectorOption(pygame.sprite.Sprite, Node):
         elif self.is_hover:
             self.is_hover = False
 
+    def handle_mousebuttonup(self, state, event):
+        if event.button == 1:
+            if state.hotbar in state.mouse_int_sprites and \
+                state.hotbar.active_mod_index == state.hotbar.BUILDING_SELECTOR and \
+                    self in state.mouse_int_sprites:
+                self.is_active = True
+            elif self.is_active and \
+                    state.minimap not in state.mouse_int_sprites:
+                self.is_active = False
+
 
 class BuildingSelector(pygame.sprite.Sprite, Node):
 
     def __init__(self, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)
         Node.__init__(self, parent)
+
+        width = Config.building_selector_height * len(buildings)
+        if width < Config.building_selector_width:
+            width = Config.building_selector_width
         self.image = pygame.Surface(
-            (Config.hotbarwidth, Config.hotbarheight - 20)
+            (width, Config.building_selector_height)
         )
         self.paintbar()
         self.rect = self.image.get_rect()
@@ -53,10 +75,13 @@ class BuildingSelector(pygame.sprite.Sprite, Node):
 
         self.options = pygame.sprite.Group()
 
-        size = self.rect.height
         colors = itertools.cycle((Config.red_300, Config.red_700))
-        for x in range(round(self.rect.width/size)):
-            option = SelectorOption(size, x*size, next(colors), parent=self)
+        for x, building in enumerate(buildings):
+            option = SelectorOption(
+                building, x*Config.building_selector_height,
+                next(colors),
+                parent=self
+            )
             self.options.add(option)
 
     def paintbar(self):
