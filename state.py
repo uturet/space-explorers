@@ -2,6 +2,7 @@ import pygame
 import math
 from config import Config
 from user_interface import Minimap, Background, Mouse, Hotbar
+from user_interface import Node
 
 
 class State():
@@ -12,7 +13,7 @@ class State():
         self.allgroup = pygame.sprite.LayeredUpdates()
         self.uigroup = pygame.sprite.Group()
         self.bggroup = pygame.sprite.Group()
-        self.intgroup = pygame.sprite.Group()
+        self.interactable_group = pygame.sprite.Group()
         self.gamegroup = pygame.sprite.Group()
 
         Background._layer = 1
@@ -25,7 +26,7 @@ class State():
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
-        self.hotbar = Hotbar()
+        self.hotbar = Hotbar(self.interactable_group)
         self.mouse = Mouse(self.bg)
         self.minimap = Minimap()
 
@@ -39,16 +40,27 @@ class State():
 
     def get_rect_intersect_sprites_by_pos(self, pos, sprites):
         for sp in sprites:
-            if sp.rect.left < pos[0] < sp.rect.right and \
-                    sp.rect.top < pos[1] < sp.rect.bottom:
+            if isinstance(sp, Node):
+                coords = sp.calculate_abs_coords()
+            else:
+                coords = sp.rect
+            if coords.left < pos[0] < coords.right and \
+                    coords.top < pos[1] < coords.bottom:
                 self.mouse_int_sprites.add(sp)
 
-    def update(self):
+    def calculate_mouse_int_sprites(self):
         self.mouse_int_sprites.clear()
         self.get_rect_intersect_sprites_by_pos(
             self.mouse.pos,
             self.uigroup
         )
+        self.get_rect_intersect_sprites_by_pos(
+            self.mouse.pos,
+            self.interactable_group
+        )
+
+    def update(self):
+        self.calculate_mouse_int_sprites()
 
         self.screen.fill(Config.dark)
         self.allgroup.update(self)

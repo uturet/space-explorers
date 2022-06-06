@@ -26,7 +26,7 @@ class Config(MaterialColors):
 
     move_area = 0.02
     speed = 50
-    scroll_speed = 30
+    scroll_speed = 100
 
     @classmethod
     def set_default_window_position(cls):

@@ -2,6 +2,7 @@ import pygame
 from config import Config
 from state import State
 from seeder import seed_players_rand
+from ordered_set import OrderedSet
 
 Config.set_default_window_position()
 state = State()
@@ -10,10 +11,10 @@ state = State()
 class EventHandler():
 
     handlers = {
-        pygame.MOUSEMOTION: set(),
-        pygame.MOUSEBUTTONDOWN: set(),
-        pygame.MOUSEBUTTONUP: set(),
-        pygame.MOUSEWHEEL: set(),
+        pygame.MOUSEMOTION: OrderedSet(),
+        pygame.MOUSEBUTTONDOWN: OrderedSet(),
+        pygame.MOUSEBUTTONUP: OrderedSet(),
+        pygame.MOUSEWHEEL: OrderedSet(),
     }
 
     handler_names = {
@@ -61,6 +62,7 @@ class Game(EventHandler):
     def __init__(self):
         pygame.init()
         self.detect_handlers(state.uigroup)
+        self.detect_handlers(state.interactable_group)
 
     def main_loop(self):
 
