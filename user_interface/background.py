@@ -18,7 +18,6 @@ class Background(pygame.sprite.Sprite):
 
     def update(self, state):
         pass
-        # self.paintbg()
 
     @property
     def pos(self):

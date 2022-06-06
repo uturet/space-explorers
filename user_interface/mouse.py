@@ -32,7 +32,7 @@ class MouseTracker(pygame.sprite.Sprite):
     preview_rect = None
     groups = ()
 
-    def __init__(self, screen):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.dimens = (Config.mouse_tracker_width, Config.mouse_tracker_height)

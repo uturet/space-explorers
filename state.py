@@ -3,6 +3,7 @@ import math
 from config import Config
 from user_interface import Minimap, Background, Mouse, MouseTracker, Hotbar
 from user_interface import Node
+from game_objects import Transmitter
 
 
 class State():
@@ -10,14 +11,18 @@ class State():
     mouse_int_sprites = set()
 
     def __init__(self):
-        self.allgroup = pygame.sprite.LayeredUpdates()
-        self.uigroup = pygame.sprite.Group()
-        self.bggroup = pygame.sprite.Group()
+        self.allgroup = pygame.sprite.Group()
+        self.uigroup = pygame.sprite.LayeredUpdates()
+        self.bggroup = pygame.sprite.LayeredUpdates()
         self.interactable_group = pygame.sprite.Group()
         self.gamegroup = pygame.sprite.Group()
 
+        Transmitter._layer = 3
+
+        Transmitter.groups = (self.allgroup, self.bggroup)
+
         Background._layer = 1
-        MouseTracker._layer = 8
+        MouseTracker._layer = 2
         Minimap._layer = 9
         Hotbar._layer = 9
 
@@ -29,7 +34,7 @@ class State():
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
         self.mouse = Mouse(self.bg)
-        self.mouse_tracker = MouseTracker(self.screen)
+        self.mouse_tracker = MouseTracker()
         self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
 
@@ -65,9 +70,10 @@ class State():
     def update(self):
         self.calculate_mouse_int_sprites()
 
-        self.screen.fill(Config.dark)
         self.allgroup.update(self)
+
         self.uigroup.draw(self.screen)
+        self.bggroup.draw(self.bg.image)
 
         for move in self.move_bg:
             move()

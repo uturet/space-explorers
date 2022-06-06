@@ -14,6 +14,12 @@ class Transmitter(Building):
 
     def __init__(self, pos):
         super().__init__(pos)
+        pygame.draw.circle(self._image, self.color,
+                           (self.radius, self.radius), self.radius)
+        self.image = self._image.convert_alpha()
+
+    def update(self, state):
+        pass
 
     @classmethod
     def get_option_image(cls):
@@ -32,7 +38,7 @@ class Transmitter(Building):
             pygame.SRCALPHA)
         rect = image.get_rect()
         pygame.draw.circle(image, cls.preview_color,
-                           rect.center, cls.option_radius)
+                           rect.center, cls.radius)
         return image
 
 

@@ -4,10 +4,13 @@ from config import Config
 
 
 class Building(pygame.sprite.Sprite):
+    size = 0
 
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.pos = pos
+        self._image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
+        self.rect = self._image.get_rect()
+        self.rect.center = pos
 
 
 class Particle(pygame.sprite.Sprite):

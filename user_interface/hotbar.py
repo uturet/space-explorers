@@ -18,6 +18,7 @@ class SelectorOption(pygame.sprite.Sprite, Node):
         self.hover_color = Config.purple_500
         self.active_color = Config.blue_500
 
+        self.building = building
         self.building_image = building.get_option_image()
         self.building_preview_image = building.get_preview_image()
         self.image = pygame.Surface(
@@ -66,6 +67,10 @@ class SelectorOption(pygame.sprite.Sprite, Node):
                     state.mouse.pos
                 )
             elif (self.is_active and
+                    state.minimap not in state.mouse_int_sprites):
+                self.building(state.mouse.bg_pos)
+        if event.button == 3:
+            if (self.is_active and
                     state.minimap not in state.mouse_int_sprites):
                 self.is_active = False
                 state.mouse_tracker.clear_preview()

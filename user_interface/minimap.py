@@ -29,8 +29,8 @@ class Minimap(pygame.sprite.Sprite):
 
         for pl in state.bggroup:
             pygame.draw.circle(self.image, pl.color,
-                               (int(pl.pos[0] * self.factorx),
-                                int(pl.pos[1] * self.factory)
+                               (int(pl.rect.centerx * self.factorx),
+                                int(pl.rect.centery * self.factory)
                                 ), 2)
 
         pygame.draw.rect(self.image, (255, 255, 255), (
