@@ -1,7 +1,7 @@
 import random
 from game_objects.player import Player
 import pygame
-from config import Config
+from core.config import Config
 
 
 def seed_players_rand(count, state):

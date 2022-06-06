@@ -1,5 +1,5 @@
 import pygame
-from config import Config
+from core.config import Config
 import itertools
 from user_interface.node import Node
 from game_objects.buildings import buildings
@@ -68,7 +68,7 @@ class SelectorOption(pygame.sprite.Sprite, Node):
                 )
             elif (self.is_active and
                     state.minimap not in state.mouse_int_sprites):
-                self.building(state.mouse.bg_pos)
+                state.create_gameobj(self.building, state.mouse.bg_pos)
         if event.button == 3:
             if (self.is_active and
                     state.minimap not in state.mouse_int_sprites):

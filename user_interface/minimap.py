@@ -1,5 +1,5 @@
 import pygame
-from config import Config
+from core.config import Config
 
 
 class Minimap(pygame.sprite.Sprite):

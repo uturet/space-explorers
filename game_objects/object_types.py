@@ -1,10 +1,12 @@
 import pygame
 
-from config import Config
+from core.config import Config
 
 
 class Building(pygame.sprite.Sprite):
     size = 0
+    is_hover = False
+    is_active = False
 
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self, self.groups)

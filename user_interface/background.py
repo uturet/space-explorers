@@ -1,5 +1,5 @@
 import pygame
-from config import Config
+from core.config import Config
 
 
 class Background(pygame.sprite.Sprite):
