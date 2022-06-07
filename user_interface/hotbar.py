@@ -214,10 +214,7 @@ class SelectorOption(pygame.sprite.Sprite, Node):
 
     def activate(self, state):
         self.is_active = True
-        state.mouse_tracker.set_preview(
-            self.preview,
-            state.mouse.pos
-        )
+        state.mouse_tracker.set_preview(self.preview)
         self.paintbar()
 
     def deactivate(self, state):

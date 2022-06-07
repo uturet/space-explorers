@@ -1,7 +1,6 @@
 import pygame
 from game_objects.object_types import Building, Preview
 from core.config import Config
-from core import collision_handler as ch
 
 
 class Transmitter(Building):
@@ -61,51 +60,12 @@ class TransmitterPreview(Preview):
     color = Config.blue_500
     preview_color = Config.blue_200
 
-    lines = set()
-
-    def get_option_image(self):
-        image = pygame.Surface(
-            (Config.building_selector_height, Config.building_selector_height),
-            pygame.SRCALPHA)
-        rect = image.get_rect()
+    def draw_option_image(self, image, rect):
         pygame.draw.circle(image, self.color, rect.center, self.option_radius)
-        return image
 
-    def get_preview_image(self):
-        image = pygame.Surface(
-            (self.cover_size, self.cover_size),
-            pygame.SRCALPHA)
-        return image
-
-    def update_preview_image(self):
-        self.preview_image.fill((255, 255, 255, 0))
-        for line_args in self.lines:
-            pygame.draw.line(*line_args)
+    def draw_preview_image(self,):
         pygame.draw.circle(self.preview_image, self.preview_color,
                            self.preview_rect.center, self.radius)
-
-    def handle_collisions(self, state, collisions):
-        self.lines.clear()
-        for sp in collisions:
-            if isinstance(sp, self.building) and \
-                ch.circle_intersects_circle(
-                    state.mouse.bg_pos, self.cover_radius,
-                    sp.rect.center, sp.radius
-            ):
-                pos = state.mouse.bg_pos_to_abs(sp.rect.center)
-                pos = (
-                    pos[0]-state.mouse.pos[0]+self.preview_rect.centerx,
-                    pos[1]-state.mouse.pos[1]+self.preview_rect.centery
-                )
-                self.lines.add(
-                    (
-                        self.preview_image,
-                        self.color,
-                        self.preview_rect.center,
-                        pos,
-                        3
-                    )
-                )
 
 
 building_previews = (

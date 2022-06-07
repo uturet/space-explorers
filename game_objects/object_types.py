@@ -1,6 +1,7 @@
 import pygame
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 from core.config import Config
+from core import collision_handler as ch
 
 
 class Building(pygame.sprite.Sprite):
@@ -28,10 +29,13 @@ class Preview(ABC):
 
     cover_size = 0
     cover_radius = 0
+    radius = 0
     option_radius = 0
 
     color = Config.black
     preview_color = Config.black
+
+    lines = set()
 
     def __init__(self):
         self.option_image = self.get_option_image()
@@ -40,17 +44,55 @@ class Preview(ABC):
         self.option_rect = self.option_image.get_rect()
         self.preview_rect = self.preview_image.get_rect()
 
-    @abstractclassmethod
     def get_option_image(self):
-        pass
+        image = pygame.Surface(
+            (Config.building_selector_height, Config.building_selector_height),
+            pygame.SRCALPHA)
+        self.draw_option_image(image, image.get_rect())
+        return image
 
-    @abstractclassmethod
     def get_preview_image(self):
+        image = pygame.Surface(
+            (self.cover_size, self.cover_size),
+            pygame.SRCALPHA)
+        return image
+
+    def update_preview_image(self):
+        self.preview_image.fill((255, 255, 255, 0))
+        for line_args in self.lines:
+            pygame.draw.line(*line_args)
+        self.draw_preview_image()
+
+    @abstractmethod
+    def draw_option_image(self, image, rect):
         pass
 
-    @abstractclassmethod
-    def handle_collisions(self, state, collisions):
+    @abstractmethod
+    def draw_preview_image(self):
         pass
+
+    def handle_interceptions(self, state, interceptions):
+        self.lines.clear()
+        for sp in interceptions:
+            if isinstance(sp, Building) and \
+                ch.circle_intersects_circle(
+                    state.mouse.bg_pos, self.cover_radius,
+                    sp.rect.center, sp.radius
+            ):
+                pos = state.bg.bg_pos_to_abs(sp.rect.centerx, sp.rect.centery)
+                pos = (
+                    pos[0]-state.mouse.pos[0]+self.preview_rect.centerx,
+                    pos[1]-state.mouse.pos[1]+self.preview_rect.centery
+                )
+                self.lines.add(
+                    (
+                        self.preview_image,
+                        self.color,
+                        self.preview_rect.center,
+                        pos,
+                        3
+                    )
+                )
 
 
 class Particle(pygame.sprite.Sprite):

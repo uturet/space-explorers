@@ -32,7 +32,7 @@ class State:
 
         self.clock = pygame.time.Clock()
 
-        self.add_group(
+        self.event_manager.add_group(
             self,
             *self.uigroup,
             *self.interactable_group,
@@ -43,7 +43,9 @@ class State:
     def handle_mousemotion(self, state, event):
         self.mouse_intersected.clear()
         self.state.tmp_group.clear()
-        self.mouse.pos = event.pos
+        self.mouse.rect.center = event.pos
+        self.mouse.bg_rect.center = self.bg.abs_pos_to_bg(
+            event.pos[0], event.pos[1])
 
         ch.get_rect_intersect_sprites_by_pos(
             self.mouse.pos,

@@ -77,3 +77,15 @@ class Background(pygame.sprite.Sprite):
         )
 
         self.rect.center = (x, y)
+
+    def bg_pos_to_abs(self, x, y):
+        x = round(x + (self.rect.centerx - (self.dimens[0]/2)))
+        y = round(y + (self.rect.centery - (self.dimens[1]/2)))
+        return x, y
+
+    def abs_pos_to_bg(self, x, y):
+        x = round(x - (self.rect.centerx - (self.dimens[0]/2)))
+        x = max(0, min(x, self.dimens[0]))
+        y = round(y - (self.rect.centery - (self.dimens[1]/2)))
+        y = max(0, min(y, self.dimens[1]))
+        return x, y
