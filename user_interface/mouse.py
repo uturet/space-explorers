@@ -36,6 +36,14 @@ class Mouse:
 
 class MouseTracker(pygame.sprite.Sprite):
 
+    DEFAULT_STATUS = 0
+    INACTIVE = 0
+    SELECT = 1
+    PREVIEW = 2
+    cur_status = 0
+
+    pos = (0, 0)
+
     is_active = False
     preview = None
     preview_rect = None

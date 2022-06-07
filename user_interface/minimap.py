@@ -40,7 +40,7 @@ class Minimap(pygame.sprite.Sprite):
             round(Config.height * self.factory, 0)), 1)
 
     def handle_mousebuttondown(self, state, event):
-        if event.button == 1 and self in state.mouse_int_sprites:
+        if event.button == 1 and self in state.mouse_intersected:
             self.follow_mouse = True
             x = round(event.pos[0] / self.factorx)
             y = round((event.pos[1] - self.rect.top) / self.factory)
@@ -50,7 +50,7 @@ class Minimap(pygame.sprite.Sprite):
         self.follow_mouse = False
 
     def handle_mousemotion(self, state, event):
-        if self.follow_mouse and self in state.mouse_int_sprites:
+        if self.follow_mouse and self in state.mouse_intersected:
             x = round(event.pos[0] / self.factorx)
             y = round((event.pos[1] - self.rect.top) / self.factory)
             state.bg.move(x, y)

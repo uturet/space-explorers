@@ -2,13 +2,15 @@ import pygame
 from core.config import Config
 from user_interface import Minimap, Background, Mouse, MouseTracker, Hotbar
 from game_objects import Transmitter
-from core.livecycle_manager import LiveCicleManager
+from core.event_manager import EventManager
 from core import collision_handler as ch
+from core.grid import Grid
 
 
-class State(LiveCicleManager):
+class State:
     move_bg = set()
-    mouse_int_sprites = set()
+    mouse_intersected = set()
+    tmp_group = set()
 
     def __init__(self):
         self.allgroup = pygame.sprite.Group()
@@ -19,38 +21,47 @@ class State(LiveCicleManager):
 
         self.set_group_attachmet()
 
+        self.event_manager = EventManager(self, self.clear_tmp_group)
+        self.grid = Grid()
+
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = Background()
-        self.mouse = Mouse(self.bg)
-        self.mouse_tracker = MouseTracker()
+        self.mouse = Mouse()
         self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
 
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode((Config.width, Config.height))
 
-        self.detect_handlers(self.uigroup)
-        self.detect_handlers(self.interactable_group)
-        self.detect_handlers(self.gamegroup)
+        self.add_group(
+            self,
+            *self.uigroup,
+            *self.interactable_group,
+            *self.gamegroup,
+            self.mouse,
+        )
 
-    def calculate_mouse_int_sprites(self):
-        self.mouse_int_sprites.clear()
+    def handle_mousemotion(self, state, event):
+        self.mouse_intersected.clear()
+        self.state.tmp_group.clear()
+        self.mouse.pos = event.pos
 
         ch.get_rect_intersect_sprites_by_pos(
             self.mouse.pos,
             self.uigroup,
-            self.mouse_int_sprites
+            self.mouse_intersected
         )
         ch.get_rect_intersect_sprites_by_pos(
             self.mouse.pos,
             self.interactable_group,
-            self.mouse_int_sprites
+            self.mouse_intersected
         )
-        ch.get_rect_intersect_sprites_by_pos(
-            self.mouse.bg_pos,
-            self.gamegroup,
-            self.mouse_int_sprites
-        )
+
+        if (self.minimap not in self.mouse_intersected and
+            self.hotbar not in self.mouse_intersected and
+                self.mouse.cur_state == self.mouse.INACTIVE):
+            self.grid.get_interseced_group(
+                event.pos[0], event.pos[1], self.tmp_group)
+            self.mouse_intersected.update(self.tmp_group)
 
     def set_group_attachmet(self):
         Transmitter._layer = 3
@@ -68,7 +79,7 @@ class State(LiveCicleManager):
         Minimap.groups = (self.allgroup, self.uigroup)
 
     def update(self):
-        self.calculate_mouse_int_sprites()
+        self.calculate_mouse_intersected()
 
         self.allgroup.update(self)
 

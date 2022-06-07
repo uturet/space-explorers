@@ -34,7 +34,7 @@ class Transmitter(Building):
         pass
 
     def handle_mousebuttonup(self, state, event):
-        if self in state.mouse_int_sprites:
+        if self in state.mouse_intersected:
             self.is_active = True
             self.paint()
         elif self.is_active:
@@ -42,7 +42,7 @@ class Transmitter(Building):
             self.paint()
 
     def handle_mousemotion(self, state, event):
-        if self in state.mouse_int_sprites:
+        if self in state.mouse_intersected:
             self.is_hover = True
             self.paint()
         elif self.is_hover:

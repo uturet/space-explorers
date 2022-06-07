@@ -18,7 +18,12 @@ class Game:
             for event in events:
                 if event.type == pygame.QUIT:
                     running = False
-                self.state.handle_event(event)
+                self.state.event_manager.notify(event)
+
+            for tmp_sub in self.self.state.tmp_group:
+                for event in events:
+                    self.state.event_manager.notify_tmp_sub(tmp_sub, event)
+
             self.state.update()
             self.draw()
         pygame.quit()
