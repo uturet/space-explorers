@@ -18,6 +18,7 @@ class Config(MaterialColors):
 
     bigmapwidth = 4000
     bigmapheight = 4000
+    chunk_size = 100
     cornerpoint = [0, 0]
     fps = 60
 

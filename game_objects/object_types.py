@@ -71,9 +71,9 @@ class Preview(ABC):
     def draw_preview_image(self):
         pass
 
-    def handle_interceptions(self, state, interceptions):
+    def handle_intersections(self, state, intersections):
         self.lines.clear()
-        for sp in interceptions:
+        for sp in intersections:
             if isinstance(sp, Building) and \
                 ch.circle_intersects_circle(
                     state.mouse.bg_pos, self.cover_radius,
@@ -117,7 +117,7 @@ class Particle(pygame.sprite.Sprite):
             Sweep and Prune
             Space Partitions
                 Uniform grid partition
-                Smarter Space Partitioning 
+                Smarter Space Partitioning
                     K-D Trees
             Object Partitions
                 Bounding Volume Hierarchies

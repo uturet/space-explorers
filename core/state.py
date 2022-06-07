@@ -61,8 +61,7 @@ class State:
         if (self.minimap not in self.mouse_intersected and
             self.hotbar not in self.mouse_intersected and
                 self.mouse.cur_state == self.mouse.INACTIVE):
-            self.grid.get_interseced_group(
-                event.pos[0], event.pos[1], self.tmp_group)
+            self.grid.pos_intersects(event.pos, self.tmp_group)
             self.mouse_intersected.update(self.tmp_group)
 
     def set_group_attachmet(self):

@@ -14,7 +14,7 @@ class Mouse(pygame.sprite.Sprite):
     preview = None
     preview_rect = None
     groups = ()
-    interceptions = set()
+    intersections = set()
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
@@ -44,12 +44,11 @@ class Mouse(pygame.sprite.Sprite):
 
     def handle_mousemotion(self, state, event):
         if self.active_mod == self.PREVIEW:
-            self.interceptions.clear()
+            self.intersections.clear()
 
-            state.grid.get_interseced_group_by_rect(
-                self.bg_rect, self.interceptions)
+            state.grid.pos_intersects_by_rect(self.bg_rect, self.intersections)
 
-            self.preview.handle_interceptions(state, self.interceptions)
+            self.preview.handle_intersections(state, self.intersections)
             self.image.fill((255, 255, 255, 0))
             self.preview.update_preview_image()
             self.image.blit(self.preview.preview_image, (0, 0))
