@@ -1,10 +1,11 @@
 import pygame
 from core.config import Config
-from user_interface import Minimap, Background, Mouse, MouseTracker, Hotbar
+from user_interface import Minimap, Background, Mouse, Hotbar
 from game_objects import Transmitter
 from core.event_manager import EventManager
 from core import collision_handler as ch
 from core.grid import Grid
+from seeder import seed_buildings_rand
 
 
 class State:
@@ -21,7 +22,7 @@ class State:
 
         self.set_group_attachmet()
 
-        self.event_manager = EventManager(self, self.clear_tmp_group)
+        self.event_manager = EventManager(self)
         self.grid = Grid()
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
@@ -29,6 +30,9 @@ class State:
         self.mouse = Mouse()
         self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
+
+        self.grid.draw_grid(self.bg.image)
+        seed_buildings_rand(2000, self)
 
         self.clock = pygame.time.Clock()
 
@@ -42,25 +46,25 @@ class State:
 
     def handle_mousemotion(self, state, event):
         self.mouse_intersected.clear()
-        self.state.tmp_group.clear()
+        self.tmp_group.clear()
         self.mouse.rect.center = event.pos
         self.mouse.bg_rect.center = self.bg.abs_pos_to_bg(
             event.pos[0], event.pos[1])
 
         ch.get_rect_intersect_sprites_by_pos(
-            self.mouse.pos,
+            self.mouse.rect.center,
             self.uigroup,
             self.mouse_intersected
         )
         ch.get_rect_intersect_sprites_by_pos(
-            self.mouse.pos,
+            self.mouse.rect.center,
             self.interactable_group,
             self.mouse_intersected
         )
 
         if (self.minimap not in self.mouse_intersected and
             self.hotbar not in self.mouse_intersected and
-                self.mouse.cur_state == self.mouse.INACTIVE):
+                self.mouse.active_mod == self.mouse.INACTIVE):
             self.grid.pos_intersects(event.pos, self.tmp_group)
             self.mouse_intersected.update(self.tmp_group)
 
@@ -70,18 +74,16 @@ class State:
         Transmitter.groups = (self.allgroup, self.bggroup, self.gamegroup)
 
         Background._layer = 1
-        MouseTracker._layer = 2
+        Mouse._layer = 2
         Minimap._layer = 9
         Hotbar._layer = 9
 
-        MouseTracker.groups = (self.allgroup, self.uigroup)
+        Mouse.groups = (self.allgroup, self.uigroup)
         Hotbar.groups = (self.allgroup, self.uigroup)
         Background.groups = (self.allgroup, self.uigroup)
         Minimap.groups = (self.allgroup, self.uigroup)
 
     def update(self):
-        self.calculate_mouse_intersected()
-
         self.allgroup.update(self)
 
         self.uigroup.draw(self.screen)

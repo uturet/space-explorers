@@ -76,13 +76,13 @@ class Preview(ABC):
         for sp in intersections:
             if isinstance(sp, Building) and \
                 ch.circle_intersects_circle(
-                    state.mouse.bg_pos, self.cover_radius,
+                    state.mouse.bg_rect.center, self.cover_radius,
                     sp.rect.center, sp.radius
             ):
                 pos = state.bg.bg_pos_to_abs(sp.rect.centerx, sp.rect.centery)
                 pos = (
-                    pos[0]-state.mouse.pos[0]+self.preview_rect.centerx,
-                    pos[1]-state.mouse.pos[1]+self.preview_rect.centery
+                    pos[0]-state.mouse.rect.centerx+self.preview_rect.centerx,
+                    pos[1]-state.mouse.rect.centery+self.preview_rect.centery
                 )
                 self.lines.add(
                     (

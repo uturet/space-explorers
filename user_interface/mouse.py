@@ -22,6 +22,7 @@ class Mouse(pygame.sprite.Sprite):
         self.image = pygame.Surface(self.dimens, pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
+        self.bg_rect = self.rect.copy()
 
     def set_preview(self, preview):
         self.active_mod = self.PREVIEW
@@ -33,7 +34,7 @@ class Mouse(pygame.sprite.Sprite):
         self.preview = preview
         self.preview_rect = preview.preview_image.get_rect()
         self.preview.update_preview_image()
-        self.image.blit(self.preview.preview_image, (0, 0))
+        self.image.blit(self.preview.preview_image, self.rect.bottomright)
 
     def clear_preview(self):
         self.active_mod = self.DEFAULT_MOD
@@ -51,6 +52,7 @@ class Mouse(pygame.sprite.Sprite):
             self.preview.handle_intersections(state, self.intersections)
             self.image.fill((255, 255, 255, 0))
             self.preview.update_preview_image()
+
             self.image.blit(self.preview.preview_image, (0, 0))
         elif self.active_mod == self.SELECT:
             pass

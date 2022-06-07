@@ -20,7 +20,7 @@ class Game:
                     running = False
                 self.state.event_manager.notify(event)
 
-            for tmp_sub in self.self.state.tmp_group:
+            for tmp_sub in self.state.tmp_group:
                 for event in events:
                     self.state.event_manager.notify_tmp_sub(tmp_sub, event)
 
@@ -31,7 +31,7 @@ class Game:
     def draw(self):
         pygame.display.set_caption(str(self.state.clock.get_fps()))
         pygame.display.flip()
-        self.state.clock.tick(Config.fps)
+        self.state.clock.tick(Config.fps*100)
 
 
 if __name__ == "__main__":

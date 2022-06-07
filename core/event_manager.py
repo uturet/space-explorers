@@ -18,13 +18,8 @@ class EventManager:
         pygame.MOUSEWHEEL: 'handle_mousewheel',
     }
 
-    def __init__(self, state, preparations: list):
+    def __init__(self, state):
         self.state = state
-        self.preparations = preparations
-
-    def prepare(self):
-        for p in self.preparations:
-            p()
 
     def notify(self, event):
         for type in self.handlers:

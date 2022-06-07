@@ -4,6 +4,7 @@ import itertools
 from user_interface.node import Node
 from game_objects.buildings import building_previews, Building
 from core import collision_handler as ch
+from abc import ABC
 
 
 class Hotbar(pygame.sprite.Sprite, Node):
@@ -62,7 +63,7 @@ class Hotbar(pygame.sprite.Sprite, Node):
             pass
 
 
-class HotbarMod(pygame.sprite.Sprite, Node):
+class HotbarMod(pygame.sprite.Sprite, Node, ABC):
     hotbar_mod = None
     width = Config.hotbarwidth
     height = Config.hotbarheight - 20
@@ -142,7 +143,7 @@ class BuildingSelector(HotbarMod):
 
             state.mouse_intersected.difference_update(self.options)
             ch.get_rect_intersect_sprites_by_pos(
-                state.mouse.pos,
+                state.mouse.rect.center,
                 self.options,
                 state.mouse_intersected
             )
@@ -206,7 +207,8 @@ class SelectorOption(pygame.sprite.Sprite, Node):
             elif (self.is_active and
                     state.minimap not in state.mouse_intersected and
                     state.hotbar not in state.mouse_intersected):
-                state.create_gameobj(self.preview.building, state.mouse.bg_pos)
+                state.grid.add_item(self.preview.building(
+                    state.mouse.bg_rect.center))
         if event.button == 3:
             if (self.is_active and
                     state.minimap not in state.mouse_intersected):
@@ -214,12 +216,12 @@ class SelectorOption(pygame.sprite.Sprite, Node):
 
     def activate(self, state):
         self.is_active = True
-        state.mouse_tracker.set_preview(self.preview)
+        state.mouse.set_preview(self.preview)
         self.paintbar()
 
     def deactivate(self, state):
         self.is_active = False
-        state.mouse_tracker.clear_preview()
+        state.mouse.clear_preview()
         self.paintbar()
 
 

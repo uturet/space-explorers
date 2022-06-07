@@ -2,6 +2,7 @@ import random
 from game_objects.player import Player
 import pygame
 from core.config import Config
+from game_objects.buildings import Transmitter
 
 
 def seed_players_rand(count, state):
@@ -28,3 +29,11 @@ def fill_players(size, state):
         for x in range(state.bg.image.get_width()//size):
             p = Player((x*size, y*size), state.bg.image)
             state.bggroup.add(p)
+
+
+def seed_buildings_rand(count, state):
+    for i in range(count):
+        state.grid.add_item(Transmitter((
+            random.randint(0, state.bg.dimens[0]),
+            random.randint(0, state.bg.dimens[1])
+        )))
