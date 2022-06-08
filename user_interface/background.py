@@ -6,34 +6,39 @@ class Background(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
-
+        self.moves = set()
         self.dimens = (Config.bigmapwidth, Config.bigmapheight)
         self.image = pygame.Surface(self.dimens)
-        self.paintbg()
         self.rect = self.image.get_rect()
+        self.box = self.rect.copy()
         self.rect.topleft = (0, 0)
         self.abs_rect = pygame.Rect(0, 0, Config.width, Config.height)
 
     def paintbg(self):
-        self.image.fill(Config.bg)
+        self.image.fill((255, 255, 255))
 
     def update(self, state):
-        pass
+        for move in self.moves:
+            move()
+        if self.moves:
+            self.abs_rect.left = -self.rect.left
+            self.abs_rect.top = -self.rect.top
+        # self.image.fill((255, 255, 255, 0))
 
     @property
     def pos(self):
         return self.rect.center
 
     def handle_mousemotion(self, state, event):
-        state.move_bg.clear()
+        self.moves.clear()
         if Config.width*Config.move_area > event.pos[0]:
-            state.move_bg.add(self.move_left)
+            self.moves.add(self.move_left)
         if (Config.width - Config.width*Config.move_area) < event.pos[0]:
-            state.move_bg.add(self.move_right)
+            self.moves.add(self.move_right)
         if Config.height*Config.move_area > event.pos[1]:
-            state.move_bg.add(self.move_top)
+            self.moves.add(self.move_top)
         if (Config.height - Config.height*Config.move_area) < event.pos[1]:
-            state.move_bg.add(self.move_bot)
+            self.moves.add(self.move_bot)
 
     def move_left(self):
         self.rect.right = min(Config.bigmapwidth,

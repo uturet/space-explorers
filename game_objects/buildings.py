@@ -1,9 +1,11 @@
 import pygame
 from game_objects.object_types import Building, Preview
 from core.config import Config
+from core.property import Movement
 
 
-class Transmitter(Building):
+class Transmitter(Building, Movement):
+    speed = [0, 0]
     size = 20
     radius = 10
     color = Config.blue_500
@@ -30,7 +32,8 @@ class Transmitter(Building):
         self.image = self._image.convert_alpha()
 
     def update(self, state):
-        pass
+        self.move(state)
+        self.handle_box_collision(state.bg.box)
 
     def handle_mousebuttonup(self, state, event):
         if self in state.mouse_intersected:

@@ -33,7 +33,8 @@ def fill_players(size, state):
 
 def seed_buildings_rand(count, state):
     for i in range(count):
-        state.grid.add_item(Transmitter((
+        t = Transmitter((
             random.randint(0, state.bg.dimens[0]),
             random.randint(0, state.bg.dimens[1])
-        )))
+        ))
+        state.grid.add_item(t)

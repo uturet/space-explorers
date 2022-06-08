@@ -9,7 +9,6 @@ from seeder import seed_buildings_rand
 
 
 class State:
-    move_bg = set()
     mouse_intersected = set()
     tmp_group = set()
 
@@ -25,8 +24,8 @@ class State:
         self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
 
-        self.grid.draw_grid(self.bg.image)
-        seed_buildings_rand(2000, self)
+        # self.grid.draw_grid(self.bg.image)
+        # seed_buildings_rand(100, self)
 
         self.clock = pygame.time.Clock()
 
@@ -37,6 +36,18 @@ class State:
             *self.gamegroup,
             self.mouse,
         )
+        self.screen.blit(self.bg.image, self.bg.rect)
+
+    def update(self):
+        # self.screen.fill(Config.bg)
+        self.allgroup.update(self)
+
+        self.screengroup.clear()
+        self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
+
+        for spr in self.screengroup:
+            self.bg.image.blit(spr.image, spr.rect)
+        self.uigroup.draw(self.screen)
 
     def handle_mousemotion(self, state, event):
         self.mouse_intersected.clear()
@@ -83,20 +94,3 @@ class State:
         Hotbar.groups = (self.allgroup, self.uigroup)
         Background.groups = (self.allgroup, self.uigroup)
         Minimap.groups = (self.allgroup, self.uigroup)
-
-    def update(self):
-        self.allgroup.update(self)
-
-        for move in self.move_bg:
-            move()
-            self.bg.abs_rect.left = -self.bg.rect.left
-            self.bg.abs_rect.top = -self.bg.rect.top
-
-        self.uigroup.draw(self.screen)
-
-        self.screengroup.clear()
-        self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
-
-        for spr in self.screengroup:
-            self.bg.image.blit(spr.image, spr.rect)
-        # self.bggroup.draw(self.bg.image)
