@@ -15,6 +15,9 @@ class Building(pygame.sprite.Sprite):
         self.rect = self._image.get_rect()
         self.rect.center = pos
 
+    def draw(self, state):
+        pass
+
     @classmethod
     def get_option_image(cls):
         pass

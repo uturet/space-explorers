@@ -12,6 +12,7 @@ class State:
     milliseconds = 0
     seconds = 0
     mouse_intersected = set()
+    mouse_select = set()
     tmp_group = set()
 
     def __init__(self):
@@ -26,14 +27,15 @@ class State:
         self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
 
-        seed_buildings_rand(2000, self)
+        seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
+        seed_buildings_rand(
+            200, self, (2000, 2000, Config.width, Config.height))
 
         self.event_manager.add_group(
             self,
             *self.uigroup,
             self.bg,
             *self.interactable_group,
-            *self.gamegroup,
             self.mouse,
         )
         self.screen.blit(self.bg.image, self.bg.rect)
@@ -44,9 +46,10 @@ class State:
 
         self.screengroup.clear()
         self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
-        self.grid.draw_grid(self.screen)
+        # self.grid.draw_grid(self.screen)
 
         for spr in self.screengroup:
+            spr.draw(self)
             self.screen.blit(
                 spr.image, self.bg.bg_pos_to_abs(
                     spr.rect.left, spr.rect.top))
@@ -55,9 +58,6 @@ class State:
     def handle_mousemotion(self, state, event):
         self.mouse_intersected.clear()
         self.tmp_group.clear()
-        self.mouse.rect.center = event.pos
-        self.mouse.bg_rect.center = self.bg.abs_pos_to_bg(
-            event.pos[0], event.pos[1])
 
         ch.get_rect_intersect_sprites_by_pos(
             event.pos,
@@ -76,17 +76,37 @@ class State:
             self.grid.pos_intersects(event.pos, self.tmp_group)
             self.mouse_intersected.update(self.tmp_group)
 
+    def handle_mousepreselect(self, state, event):
+        self.mouse_select.clear()
+        for spr in self.gamegroup:
+            spr.is_hover = False
+            spr.is_active = False
+
+    def handle_mouseselect(self, state, event):
+        prev_select = self.mouse_select.copy()
+        self.mouse_select.clear()
+        self.grid.rect_intersects(event.rect, self.mouse_select)
+
+        for spr in (prev_select - self.mouse_select):
+            spr.is_hover = False
+        for spr in self.mouse_select:
+            spr.is_hover = True
+
+    def handle_mouseendselect(self, state, event):
+        for spr in self.mouse_select:
+            spr.is_hover = False
+            spr.is_active = True
+
     def set_group_attachmet(self):
         self.screengroup = set()
         self.allgroup = pygame.sprite.Group()
         self.uigroup = pygame.sprite.LayeredUpdates()
-        self.bggroup = pygame.sprite.LayeredUpdates()
         self.interactable_group = pygame.sprite.Group()
         self.gamegroup = pygame.sprite.Group()
 
         Transmitter._layer = 3
 
-        Transmitter.groups = (self.allgroup, self.bggroup)
+        Transmitter.groups = (self.allgroup, self.gamegroup)
 
         Background._layer = 1
         Mouse._layer = 2

@@ -1,7 +1,6 @@
 import pygame
 from game_objects.object_types import Building, Preview
 from core.config import Config
-from core.property import Movement
 
 
 class Transmitter(Building):
@@ -19,7 +18,7 @@ class Transmitter(Building):
         pygame.draw.circle(self._image, self.color,
                            (self.radius, self.radius), self.radius)
 
-        if self.is_hover and not self.is_active:
+        if self.is_hover:
             pygame.draw.circle(self._image, self.hover_color,
                                (self.radius, self.radius), self.radius, 2
                                )
@@ -33,20 +32,15 @@ class Transmitter(Building):
     def update(self, state):
         pass
 
+    def draw(self, state):
+        self.paint()
+
     def handle_mousebuttonup(self, state, event):
         if self in state.mouse_intersected:
             self.is_active = True
             self.paint()
         elif self.is_active:
             self.is_active = False
-            self.paint()
-
-    def handle_mousemotion(self, state, event):
-        if self in state.mouse_intersected:
-            self.is_hover = True
-            self.paint()
-        elif self.is_hover:
-            self.is_hover = False
             self.paint()
 
 

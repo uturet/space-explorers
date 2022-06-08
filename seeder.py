@@ -31,10 +31,10 @@ def fill_players(size, state):
             state.bggroup.add(p)
 
 
-def seed_buildings_rand(count, state):
+def seed_buildings_rand(count, state, rect):
     for i in range(count):
         t = Transmitter((
-            random.randint(0, state.bg.dimens[0]),
-            random.randint(0, state.bg.dimens[1])
+            random.randint(rect[0], rect[0] + rect[2]),
+            random.randint(rect[1], rect[1] + rect[3])
         ))
         state.grid.add_item(t)

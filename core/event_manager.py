@@ -1,5 +1,6 @@
 import pygame
 from ordered_set import OrderedSet
+from core.event import MOUSEPRESELECT, MOUSESELECT, MOUSEENDSELECT
 
 
 class EventManager:
@@ -9,6 +10,9 @@ class EventManager:
         pygame.MOUSEBUTTONDOWN: OrderedSet(),
         pygame.MOUSEBUTTONUP: OrderedSet(),
         pygame.MOUSEWHEEL: OrderedSet(),
+        MOUSEPRESELECT: set(),
+        MOUSESELECT: set(),
+        MOUSEENDSELECT: set(),
     }
 
     handler_names = {
@@ -16,6 +20,9 @@ class EventManager:
         pygame.MOUSEBUTTONDOWN: 'handle_mousebuttondown',
         pygame.MOUSEBUTTONUP: 'handle_mousebuttonup',
         pygame.MOUSEWHEEL: 'handle_mousewheel',
+        MOUSEPRESELECT: 'handle_mousepreselect',
+        MOUSESELECT: 'handle_mouseselect',
+        MOUSEENDSELECT: 'handle_mouseendselect',
     }
 
     def __init__(self, state):

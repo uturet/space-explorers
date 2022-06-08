@@ -27,7 +27,7 @@ class Minimap(pygame.sprite.Sprite):
     def update(self, state):
         self.paintmap()
 
-        for pl in state.bggroup:
+        for pl in state.gamegroup:
             pygame.draw.circle(self.image, pl.color,
                                (int(pl.rect.centerx * self.factorx),
                                 int(pl.rect.centery * self.factory)
