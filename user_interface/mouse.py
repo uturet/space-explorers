@@ -1,6 +1,7 @@
 from core.config import Config
 import pygame
 from core.event import MOUSEPRESELECT, MOUSESELECT, MOUSEENDSELECT
+from core import collision_handler as ch
 
 
 class Mouse(pygame.sprite.Sprite):
@@ -48,7 +49,6 @@ class Mouse(pygame.sprite.Sprite):
         self.image = pygame.Surface(
             (Config.width, Config.height), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
-        self.select_point = (pos[0], pos[1])
 
     def clear_selector(self):
         pass
@@ -69,14 +69,14 @@ class Mouse(pygame.sprite.Sprite):
             self.image.blit(self.preview.preview_image, (0, 0))
         elif self.active_mod == self.SELECT:
             self.image.fill((255, 255, 255, 0))
-            data = {'rect': self.get_selected_rect(event.pos)}
+            bg_rect = ch.rect_from_points(
+                self.select_point, state.bg.abs_pos_to_bg(*event.pos))
             pygame.draw.rect(
                 self.image, Config.yellow_500,
-                data['rect'],
-                2)
-            data['rect'].topleft = state.bg.abs_pos_to_bg(
-                data['rect'].x, data['rect'].y)
-            pygame.event.post(pygame.event.Event(MOUSESELECT, data))
+                (state.bg.bg_pos_to_abs(*self.select_point), (bg_rect.w, bg_rect.h)), 2)
+
+            pygame.event.post(pygame.event.Event(
+                MOUSESELECT, {'rect': bg_rect}))
 
     def handle_mousebuttondown(self, state, event):
         if event.button != 1:
@@ -85,6 +85,8 @@ class Mouse(pygame.sprite.Sprite):
             state.minimap not in state.mouse_intersected and \
                 state.hotbar not in state.mouse_intersected:
             self.active_mod = self.SELECT
+            self.select_point = state.bg.abs_pos_to_bg(
+                event.pos[0], event.pos[1])
             self.set_selector(event.pos)
             pygame.event.post(pygame.event.Event(MOUSEPRESELECT))
 
@@ -95,19 +97,3 @@ class Mouse(pygame.sprite.Sprite):
             self.active_mod = self.INACTIVE
             self.image.fill((255, 255, 255, 0))
             pygame.event.post(pygame.event.Event(MOUSEENDSELECT))
-
-    def get_selected_rect(self, pos):
-        rect = ['l', 't', 'w', 'h']
-        if self.select_point[0] < pos[0]:
-            rect[0] = self.select_point[0]
-            rect[2] = pos[0] - rect[0]
-        else:
-            rect[0] = pos[0]
-            rect[2] = self.select_point[0] - rect[0]
-        if self.select_point[1] < pos[1]:
-            rect[1] = self.select_point[1]
-            rect[3] = pos[1] - rect[1]
-        else:
-            rect[1] = pos[1]
-            rect[3] = self.select_point[1] - rect[1]
-        return pygame.Rect(rect)
