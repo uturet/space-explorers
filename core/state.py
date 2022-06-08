@@ -14,12 +14,6 @@ class State:
     tmp_group = set()
 
     def __init__(self):
-        self.allgroup = pygame.sprite.Group()
-        self.uigroup = pygame.sprite.LayeredUpdates()
-        self.bggroup = pygame.sprite.LayeredUpdates()
-        self.interactable_group = pygame.sprite.Group()
-        self.gamegroup = pygame.sprite.Group()
-
         self.set_group_attachmet()
 
         self.event_manager = EventManager(self)
@@ -69,6 +63,13 @@ class State:
             self.mouse_intersected.update(self.tmp_group)
 
     def set_group_attachmet(self):
+        self.screengroup = set()
+        self.allgroup = pygame.sprite.Group()
+        self.uigroup = pygame.sprite.LayeredUpdates()
+        self.bggroup = pygame.sprite.LayeredUpdates()
+        self.interactable_group = pygame.sprite.Group()
+        self.gamegroup = pygame.sprite.Group()
+
         Transmitter._layer = 3
 
         Transmitter.groups = (self.allgroup, self.bggroup, self.gamegroup)
@@ -86,8 +87,16 @@ class State:
     def update(self):
         self.allgroup.update(self)
 
-        self.uigroup.draw(self.screen)
-        self.bggroup.draw(self.bg.image)
-
         for move in self.move_bg:
             move()
+            self.bg.abs_rect.left = -self.bg.rect.left
+            self.bg.abs_rect.top = -self.bg.rect.top
+
+        self.uigroup.draw(self.screen)
+
+        self.screengroup.clear()
+        self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
+
+        for spr in self.screengroup:
+            self.bg.image.blit(spr.image, spr.rect)
+        # self.bggroup.draw(self.bg.image)

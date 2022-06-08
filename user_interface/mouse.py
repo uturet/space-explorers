@@ -47,7 +47,7 @@ class Mouse(pygame.sprite.Sprite):
         if self.active_mod == self.PREVIEW:
             self.intersections.clear()
 
-            state.grid.pos_intersects_by_rect(self.bg_rect, self.intersections)
+            state.grid.rect_intersects(self.bg_rect, self.intersections)
 
             self.preview.handle_intersections(state, self.intersections)
             self.image.fill((255, 255, 255, 0))

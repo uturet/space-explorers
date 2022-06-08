@@ -64,13 +64,13 @@ class Grid:
         ch.get_rect_intersect_sprites_by_pos(
             pos, self.__grid[self._chunk(pos)], group)
 
-    def pos_intersects_by_rect(self, rect, group):
+    def rect_intersects(self, rect, group):
         left = math.ceil(max(0, rect.left) / Config.chunk_size)
-        right = min(self._xlen, math.ceil(
-            max(0, rect.right) / Config.chunk_size)+1)
+        right = min(self._xlen+1,
+                    max(0, math.ceil((rect.right / Config.chunk_size)+1)))
         top = math.ceil(max(0, rect.top) / Config.chunk_size)
-        bottom = min(self._ylen, math.ceil(
-            max(0, rect.bottom) / Config.chunk_size)+1)
+        bottom = min(self._ylen+1,
+                     max(0, math.ceil(rect.bottom / Config.chunk_size)+1))
 
         for x in range(left, right):
             for y in range(top, bottom):
@@ -92,6 +92,6 @@ class Grid:
                     image,
                     Config.amber_500,
                     (x*Config.chunk_size, y*Config.chunk_size,
-                     (x+1)*Config.chunk_size, (y+1)*Config.chunk_size),
+                     Config.chunk_size, Config.chunk_size),
                     2
                 )

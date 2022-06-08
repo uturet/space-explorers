@@ -12,6 +12,7 @@ class Background(pygame.sprite.Sprite):
         self.paintbg()
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
+        self.abs_rect = pygame.Rect(0, 0, Config.width, Config.height)
 
     def paintbg(self):
         self.image.fill(Config.bg)
@@ -35,30 +36,20 @@ class Background(pygame.sprite.Sprite):
             state.move_bg.add(self.move_bot)
 
     def move_left(self):
-        self.rect.center = (
-            min(round(self.dimens[0]/2), self.rect.center[0] + Config.speed),
-            self.rect.center[1]
-        )
+        self.rect.right = min(Config.bigmapwidth,
+                              self.rect.right + Config.speed)
 
     def move_right(self):
-        self.rect.center = (
-            max(Config.width - round(self.dimens[0]/2),
-                self.rect.center[0] - Config.speed),
-            self.rect.center[1]
-        )
+        self.rect.left = max(Config.width-Config.bigmapwidth,
+                             self.rect.left - Config.speed)
 
     def move_top(self):
-        self.rect.center = (
-            self.rect.center[0],
-            min(round(self.dimens[1]/2), self.rect.center[1] + Config.speed)
-        )
+        self.rect.bottom = min(Config.bigmapheight,
+                               self.rect.bottom + Config.speed)
 
     def move_bot(self):
-        self.rect.center = (
-            self.rect.center[0],
-            max(Config.height - round(self.dimens[1]/2),
-                self.rect.center[1] - Config.speed)
-        )
+        self.rect.top = max(Config.height-Config.bigmapheight,
+                            self.rect.top - Config.speed)
 
     def move(self, x, y):
         x = -(x - round(self.dimens[0]/2) - round(Config.width/2))
@@ -77,6 +68,7 @@ class Background(pygame.sprite.Sprite):
         )
 
         self.rect.center = (x, y)
+        self.abs_rect.topleft = self.rect.topleft
 
     def bg_pos_to_abs(self, x, y):
         x = round(x + (self.rect.centerx - (self.dimens[0]/2)))
