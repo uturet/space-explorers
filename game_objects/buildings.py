@@ -4,8 +4,7 @@ from core.config import Config
 from core.property import Movement
 
 
-class Transmitter(Building, Movement):
-    speed = [0, 0]
+class Transmitter(Building):
     size = 20
     radius = 10
     color = Config.blue_500
@@ -32,8 +31,7 @@ class Transmitter(Building, Movement):
         self.image = self._image.convert_alpha()
 
     def update(self, state):
-        self.move(state)
-        self.handle_box_collision(state.bg.box)
+        pass
 
     def handle_mousebuttonup(self, state, event):
         if self in state.mouse_intersected:

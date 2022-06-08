@@ -10,8 +10,8 @@ class Background(pygame.sprite.Sprite):
         self.dimens = (Config.bigmapwidth, Config.bigmapheight)
         self.image = pygame.Surface(self.dimens)
         self.rect = self.image.get_rect()
-        self.box = self.rect.copy()
         self.rect.topleft = (0, 0)
+        self.box = self.rect.copy()
         self.abs_rect = pygame.Rect(0, 0, Config.width, Config.height)
 
     def paintbg(self):
@@ -73,7 +73,8 @@ class Background(pygame.sprite.Sprite):
         )
 
         self.rect.center = (x, y)
-        self.abs_rect.topleft = self.rect.topleft
+        self.abs_rect.left = -self.rect.left
+        self.abs_rect.top = -self.rect.top
 
     def bg_pos_to_abs(self, x, y):
         x = round(x + (self.rect.centerx - (self.dimens[0]/2)))

@@ -9,6 +9,8 @@ from seeder import seed_buildings_rand
 
 
 class State:
+    milliseconds = 0
+    seconds = 0
     mouse_intersected = set()
     tmp_group = set()
 
@@ -24,14 +26,12 @@ class State:
         self.hotbar = Hotbar(self.interactable_group)
         self.minimap = Minimap()
 
-        # self.grid.draw_grid(self.bg.image)
-        # seed_buildings_rand(100, self)
-
-        self.clock = pygame.time.Clock()
+        seed_buildings_rand(2000, self)
 
         self.event_manager.add_group(
             self,
             *self.uigroup,
+            self.bg,
             *self.interactable_group,
             *self.gamegroup,
             self.mouse,
@@ -39,14 +39,17 @@ class State:
         self.screen.blit(self.bg.image, self.bg.rect)
 
     def update(self):
-        # self.screen.fill(Config.bg)
+        self.screen.fill(Config.bg)
         self.allgroup.update(self)
 
         self.screengroup.clear()
         self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
+        self.grid.draw_grid(self.screen)
 
         for spr in self.screengroup:
-            self.bg.image.blit(spr.image, spr.rect)
+            self.screen.blit(
+                spr.image, self.bg.bg_pos_to_abs(
+                    spr.rect.left, spr.rect.top))
         self.uigroup.draw(self.screen)
 
     def handle_mousemotion(self, state, event):
@@ -57,12 +60,12 @@ class State:
             event.pos[0], event.pos[1])
 
         ch.get_rect_intersect_sprites_by_pos(
-            self.mouse.rect.center,
+            event.pos,
             self.uigroup,
             self.mouse_intersected
         )
         ch.get_rect_intersect_sprites_by_pos(
-            self.mouse.rect.center,
+            event.pos,
             self.interactable_group,
             self.mouse_intersected
         )
@@ -83,7 +86,7 @@ class State:
 
         Transmitter._layer = 3
 
-        Transmitter.groups = (self.allgroup, self.bggroup, self.gamegroup)
+        Transmitter.groups = (self.allgroup, self.bggroup)
 
         Background._layer = 1
         Mouse._layer = 2
@@ -92,5 +95,5 @@ class State:
 
         Mouse.groups = (self.allgroup, self.uigroup)
         Hotbar.groups = (self.allgroup, self.uigroup)
-        Background.groups = (self.allgroup, self.uigroup)
+        Background.groups = (self.allgroup)
         Minimap.groups = (self.allgroup, self.uigroup)

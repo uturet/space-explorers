@@ -10,6 +10,7 @@ class Game:
     def __init__(self):
         pygame.init()
         self.state = State()
+        self.clock = pygame.time.Clock()
 
     def main_loop(self):
         running = True
@@ -29,9 +30,10 @@ class Game:
         pygame.quit()
 
     def draw(self):
-        pygame.display.set_caption(str(round(self.state.clock.get_fps())))
+        pygame.display.set_caption(str(round(self.clock.get_fps())))
         pygame.display.flip()
-        self.state.clock.tick(Config.fps*100)
+        self.state.milliseconds = self.clock.tick(Config.fps)
+        self.state.seconds = self.state.milliseconds / 1000.0
 
 
 if __name__ == "__main__":
