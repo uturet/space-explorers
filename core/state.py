@@ -1,11 +1,12 @@
 import pygame
 from core.config import Config
-from user_interface import Minimap, Background, Mouse, Hotbar
+import user_interface as ui
 from game_objects import Transmitter
 from core.event_manager import EventManager
 from core import collision_handler as ch
 from core.grid import Grid
 from seeder import seed_buildings_rand
+from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD
 
 
 class State:
@@ -22,10 +23,10 @@ class State:
         self.grid = Grid()
 
         self.screen = pygame.display.set_mode((Config.width, Config.height))
-        self.bg = Background()
-        self.mouse = Mouse()
-        self.hotbar = Hotbar(self.interactable_group)
-        self.minimap = Minimap()
+        self.bg = ui.Background()
+        self.mouse = ui.Mouse()
+        self.hotbar = ui.Hotbar()
+        self.minimap = ui.Minimap()
 
         seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
         seed_buildings_rand(
@@ -96,6 +97,18 @@ class State:
         for spr in self.mouse_select:
             spr.is_hover = False
             spr.is_active = True
+        if len(self.mouse_select) > 1:
+            pygame.event.post(
+                pygame.event.Event(
+                    HOTBARMULTIINFOMOD,
+                    {'sprites': self.mouse_select}
+                ))
+        elif len(self.mouse_select) == 1:
+            pygame.event.post(
+                pygame.event.Event(
+                    HOTBARINFOMOD,
+                    {'sprite': tuple(self.mouse_select)[0]}
+                ))
 
     def set_group_attachmet(self):
         self.screengroup = set()
@@ -108,12 +121,17 @@ class State:
 
         Transmitter.groups = (self.allgroup, self.gamegroup)
 
-        Background._layer = 1
-        Mouse._layer = 2
-        Minimap._layer = 9
-        Hotbar._layer = 9
+        ui.Background._layer = 1
+        ui.Mouse._layer = 2
+        ui.Minimap._layer = 9
+        ui.Hotbar._layer = 9
 
-        Mouse.groups = (self.allgroup, self.uigroup)
-        Hotbar.groups = (self.allgroup, self.uigroup)
-        Background.groups = (self.allgroup)
-        Minimap.groups = (self.allgroup, self.uigroup)
+        ui.BuildingSelector.groups = (self.interactable_group)
+        ui.InfoBar.groups = (self.interactable_group)
+        ui.MultiInfoBar.groups = (self.interactable_group)
+        ui.SelectorOption.groups = (self.interactable_group)
+
+        ui.Mouse.groups = (self.allgroup, self.uigroup)
+        ui.Hotbar.groups = (self.allgroup, self.uigroup)
+        ui.Background.groups = (self.allgroup)
+        ui.Minimap.groups = (self.allgroup, self.uigroup)

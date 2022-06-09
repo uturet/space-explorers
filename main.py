@@ -1,7 +1,6 @@
 import pygame
 from core.config import Config
 from core.state import State
-
 Config.set_default_window_position()
 
 

@@ -1,6 +1,12 @@
 import pygame
 from ordered_set import OrderedSet
-from core.event import MOUSEPRESELECT, MOUSESELECT, MOUSEENDSELECT
+from core.event import (
+    MOUSEPRESELECT,
+    MOUSESELECT,
+    MOUSEENDSELECT,
+    HOTBARINFOMOD,
+    HOTBARMULTIINFOMOD
+)
 
 
 class EventManager:
@@ -13,6 +19,8 @@ class EventManager:
         MOUSEPRESELECT: set(),
         MOUSESELECT: set(),
         MOUSEENDSELECT: set(),
+        HOTBARINFOMOD: set(),
+        HOTBARMULTIINFOMOD: set(),
     }
 
     handler_names = {
@@ -23,6 +31,8 @@ class EventManager:
         MOUSEPRESELECT: 'handle_mousepreselect',
         MOUSESELECT: 'handle_mouseselect',
         MOUSEENDSELECT: 'handle_mouseendselect',
+        HOTBARINFOMOD: 'handle_hotbarinfomod',
+        HOTBARMULTIINFOMOD: 'handle_hotbarmultiinfomod',
     }
 
     def __init__(self, state):

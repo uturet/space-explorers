@@ -1,96 +1,11 @@
-import pygame
+
+from user_interface.hotbar.hotbar import Hotbar, HotbarMod
+from game_objects.buildings import building_previews
+from core import collision_handler as ch
+from user_interface.node import Node
 from core.config import Config
 import itertools
-from user_interface.node import Node
-from game_objects.buildings import building_previews, Building
-from core import collision_handler as ch
-from abc import ABC
-
-
-class Hotbar(pygame.sprite.Sprite, Node):
-
-    BUILDING_SELECTOR = 0
-    INFOBAR = 1
-    MULTI_INFOBAR = 2
-
-    DEFAULT_MOD = 0
-    active_mod_index = 0
-
-    def __init__(self, group, parent=None):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        Node.__init__(self, parent)
-        self.image = pygame.Surface(
-            (Config.hotbarwidth, Config.hotbarheight))
-        self.paintbar()
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (
-            round(Config.width / 2) - round(Config.hotbarwidth/2),
-            Config.height - Config.hotbarheight
-        )
-
-        BuildingSelector.groups = group
-        InfoBar.groups = group
-        MultiInfoBar.groups = group
-        SelectorOption.groups = group
-
-        self.building_selector = BuildingSelector(parent=self)
-        self.infobar = InfoBar(parent=self)
-        self.multi_infobar = MultiInfoBar(parent=self)
-        self.mods = (self.building_selector, self.infobar, self.multi_infobar)
-
-    def handle_selected(self, selected=None):
-        if selected is None:
-            self.active_mod_index = self.DEFAULT_MOD
-        elif isinstance(selected, Building):
-            self.active_mod_index = self.INFOBAR
-        elif type(selected) is list:
-            self.active_mod_index = self.MULTI_INFOBAR
-
-    @property
-    def active_mod(self):
-        return self.mods[self.active_mod_index]
-
-    def paintbar(self):
-        self.image.fill(Config.dark)
-
-    def update(self, state):
-        self.paintbar()
-        self.image.blit(self.active_mod.image, self.active_mod.rect.topleft)
-        self.active_mod.update(state)
-
-    def handle_mousewheel(self, state, event):
-        if self in state.mouse_intersected:
-            pass
-
-
-class HotbarMod(pygame.sprite.Sprite, Node, ABC):
-    hotbar_mod = None
-    width = Config.hotbarwidth
-    height = Config.hotbarheight - 20
-
-    def __init__(self, parent=None):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        Node.__init__(self, parent)
-
-        self.image = pygame.Surface((self.width, self.height))
-        self.paintbar()
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (10, 10)
-
-    def paintbar(self):
-        self.image.fill(Config.bluegrey_500)
-
-    def update(self, state):
-        pass
-
-    def is_hovered(self, state):
-        return (state.hotbar in state.mouse_intersected and
-                state.hotbar.active_mod_index == self.hotbar_mod and
-                self in state.mouse_intersected)
-
-    def handle_mousewheel(self, state, event):
-        if self.is_hovered(state):
-            pass
+import pygame
 
 
 class BuildingSelector(HotbarMod):
@@ -223,17 +138,3 @@ class SelectorOption(pygame.sprite.Sprite, Node):
         self.is_active = False
         state.mouse.clear_preview()
         self.paintbar()
-
-
-class InfoBar(HotbarMod):
-    hotbar_mod = Hotbar.INFOBAR
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-
-class MultiInfoBar(HotbarMod):
-    hotbar_mod = Hotbar.MULTI_INFOBAR
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
