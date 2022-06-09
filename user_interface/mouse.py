@@ -12,6 +12,7 @@ class Mouse(pygame.sprite.Sprite):
 
     active_mod = INACTIVE
     select_point = (0, 0)
+    pos = (0, 0)
 
     preview = None
     preview_rect = None
@@ -54,12 +55,12 @@ class Mouse(pygame.sprite.Sprite):
         pass
 
     def handle_mousemotion(self, state, event):
+        self.pos = event.pos
         if self.active_mod == self.PREVIEW:
-            self.rect.center = event.pos
+            self.rect.center = self.pos
             self.bg_rect.center = state.bg.abs_pos_to_bg(
                 event.pos[0], event.pos[1])
             self.intersections.clear()
-
             state.grid.rect_intersects(self.bg_rect, self.intersections)
 
             self.preview.handle_intersections(state, self.intersections)
@@ -71,9 +72,11 @@ class Mouse(pygame.sprite.Sprite):
             self.image.fill((255, 255, 255, 0))
             bg_rect = ch.rect_from_points(
                 self.select_point, state.bg.abs_pos_to_bg(*event.pos))
+            abs_rect = ch.rect_from_points(
+                state.bg.bg_pos_to_abs(*self.select_point), event.pos)
             pygame.draw.rect(
                 self.image, Config.yellow_500,
-                (state.bg.bg_pos_to_abs(*self.select_point), (bg_rect.w, bg_rect.h)), 2)
+                abs_rect, 2)
 
             pygame.event.post(pygame.event.Event(
                 MOUSESELECT, {'rect': bg_rect}))

@@ -1,5 +1,6 @@
 import pygame
 from core.config import Config
+from core.event import BGMOVE
 
 
 class Background(pygame.sprite.Sprite):
@@ -23,7 +24,8 @@ class Background(pygame.sprite.Sprite):
         if self.moves:
             self.abs_rect.left = -self.rect.left
             self.abs_rect.top = -self.rect.top
-        # self.image.fill((255, 255, 255, 0))
+            pygame.event.post(pygame.event.Event(
+                pygame.MOUSEMOTION, {'pos': state.mouse.pos}))
 
     @property
     def pos(self):
@@ -39,6 +41,8 @@ class Background(pygame.sprite.Sprite):
             self.moves.add(self.move_top)
         if (Config.height - Config.height*Config.move_area) < event.pos[1]:
             self.moves.add(self.move_bot)
+        print(len(self.moves), event.pos == state.mouse.rect.center,
+              event.pos, state.mouse.rect.center)
 
     def move_left(self):
         self.rect.right = min(Config.bigmapwidth,
