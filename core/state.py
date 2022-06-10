@@ -7,6 +7,7 @@ from core import collision_handler as ch
 from core.grid import Grid
 from seeder import seed_buildings_rand
 from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD
+from game_objects.buildings import building_previews, TransmitterPreview
 
 
 class State:
@@ -17,12 +18,12 @@ class State:
     tmp_group = set()
 
     def __init__(self):
+        self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.set_group_attachmet()
 
         self.event_manager = EventManager(self)
         self.grid = Grid()
 
-        self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = ui.Background()
         self.mouse = ui.Mouse()
         self.hotbar = ui.hotbar.Hotbar()
@@ -135,3 +136,5 @@ class State:
         ui.hotbar.Hotbar.groups = (self.allgroup, self.uigroup)
         ui.Background.groups = (self.allgroup)
         ui.Minimap.groups = (self.allgroup, self.uigroup)
+
+        building_previews['Transmitter'] = TransmitterPreview()
