@@ -49,7 +49,7 @@ class Preview(ABC):
 
     def get_option_image(self):
         image = pygame.Surface(
-            (Config.building_selector_height, Config.building_selector_height),
+            (Config.hotbarheight, Config.hotbarheight),
             pygame.SRCALPHA)
         self.draw_option_image(image, image.get_rect())
         return image

@@ -5,47 +5,57 @@ from abc import ABC
 import pygame
 
 
-class Hotbar(pygame.sprite.Sprite, ui.Node):
+class Hotbar(pygame.sprite.Sprite):
 
-    BUILDING_SELECTOR = 0
-    INFOBAR = 1
-    MULTI_INFOBAR = 2
+    SELECTMOD = 0
+    INFOMOD = 1
+    MULTI_INFOMOD = 2
 
-    DEFAULT_MOD = 0
-    active_mod_index = 0
+    DEFAULT_MOD = SELECTMOD
+    active_mod_index = DEFAULT_MOD
 
-    def __init__(self, parent=None):
+    width = Config.hotbarwidth
+    height = Config.hotbarheight
+
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        ui.Node.__init__(self, parent)
         self.image = pygame.Surface(
             (Config.hotbarwidth, Config.hotbarheight))
         self.paintbar()
         self.rect = self.image.get_rect()
-        self.rect.topleft = (
+        self.rect.bottomleft = (
             round(Config.width / 2) - round(Config.hotbarwidth/2),
-            Config.height - Config.hotbarheight
+            Config.height
         )
 
-        self.building_selector = ui.BuildingSelector(parent=self)
+        self.selectbar = ui.Selectbar(parent=self)
         self.infobar = ui.InfoBar(parent=self)
         self.multi_infobar = ui.MultiInfoBar(parent=self)
-        self.mods = (self.building_selector, self.infobar, self.multi_infobar)
+        self.mods = (self.selectbar, self.infobar, self.multi_infobar)
 
     def handle_selected(self, selected=None):
         if selected is None:
             self.active_mod_index = self.DEFAULT_MOD
         elif isinstance(selected, Building):
-            self.active_mod_index = self.INFOBAR
+            self.active_mod_index = self.INFOMOD
         elif type(selected) is list:
-            self.active_mod_index = self.MULTI_INFOBAR
+            self.active_mod_index = self.MULTI_INFOMOD
+
+    def handle_hotbarselectmod(self, state, event):
+        self.active_mod_index = self.SELECTMOD
 
     def handle_hotbarinfomod(self, state, event):
-        self.active_mod_index = self.INFOBAR
+        self.active_mod_index = self.INFOMOD
         self.active_mod.set_info_provider(event.sprite)
 
     def handle_hotbarmultiinfomod(self, state, event):
-        self.active_mod_index = self.MULTI_INFOBAR
+        self.active_mod_index = self.MULTI_INFOMOD
         self.active_mod.set_info_providers(event.sprites)
+
+    def set_active_mod(self, mod_index):
+        if mod_index in (
+                self.SELECTMOD, self.INFOMOD, self.MULTI_INFOMOD):
+            self.active_mod_index = mod_index
 
     @property
     def active_mod(self):
@@ -60,19 +70,15 @@ class Hotbar(pygame.sprite.Sprite, ui.Node):
         self.active_mod.update(state)
 
 
-class HotbarMod(pygame.sprite.Sprite, ui.Node, ABC):
+class HotbarMod(ui.Node, ABC):
     hotbar_mod = None
     width = Config.hotbarwidth
-    height = Config.hotbarheight - 20
+    height = Config.hotbarheight
 
-    def __init__(self, parent=None):
-        pygame.sprite.Sprite.__init__(self, self.groups)
+    def __init__(self, parent):
         ui.Node.__init__(self, parent)
-
-        self.image = pygame.Surface((self.width, self.height))
         self.paintbar()
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (10, 10)
+        self.rect.topleft = (0, 0)
 
     def paintbar(self):
         self.image.fill(Config.bluegrey_500)

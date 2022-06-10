@@ -4,7 +4,7 @@ from .mouse import Mouse
 from .node import Node
 from .hotbar import (
     Hotbar,
-    BuildingSelector,
+    Selectbar,
     InfoBar,
     MultiInfoBar,
     SelectorOption,

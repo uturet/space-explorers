@@ -28,9 +28,9 @@ class State:
         self.hotbar = ui.Hotbar()
         self.minimap = ui.Minimap()
 
-        seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
-        seed_buildings_rand(
-            200, self, (2000, 2000, Config.width, Config.height))
+        # seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
+        # seed_buildings_rand(
+        #     200, self, (2000, 2000, Config.width, Config.height))
 
         self.event_manager.add_group(
             self,
@@ -109,6 +109,8 @@ class State:
                     HOTBARINFOMOD,
                     {'sprite': tuple(self.mouse_select)[0]}
                 ))
+        else:
+            self.hotbar.set_active_mod(self.hotbar.DEFAULT_MOD)
 
     def set_group_attachmet(self):
         self.screengroup = set()
@@ -126,10 +128,7 @@ class State:
         ui.Minimap._layer = 9
         ui.Hotbar._layer = 9
 
-        ui.BuildingSelector.groups = (self.interactable_group)
-        ui.InfoBar.groups = (self.interactable_group)
-        ui.MultiInfoBar.groups = (self.interactable_group)
-        ui.SelectorOption.groups = (self.interactable_group)
+        ui.Node.groups = (self.interactable_group)
 
         ui.Mouse.groups = (self.allgroup, self.uigroup)
         ui.Hotbar.groups = (self.allgroup, self.uigroup)

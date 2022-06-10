@@ -8,25 +8,24 @@ import itertools
 import pygame
 
 
-class BuildingSelector(HotbarMod):
+class Selectbar(HotbarMod):
 
-    hotbar_mod = Hotbar.BUILDING_SELECTOR
+    hotbar_mod = Hotbar.SELECTMOD
     selected_option = None
-    height = Config.building_selector_height
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.width = Config.building_selector_height * len(building_previews)
-        if self.width < Config.building_selector_width:
-            self.width = Config.building_selector_width
+        self.width = Config.hotbarheight * len(building_previews)
+        if self.width < Config.hotbarwidth:
+            self.width = Config.hotbarwidth
 
         self.options = pygame.sprite.Group()
 
         colors = itertools.cycle((Config.red_300, Config.red_700))
-        for x, preview in enumerate(building_previews):
+        for x, preview in enumerate(building_previews.values()):
             option = SelectorOption(
-                preview(), x*Config.building_selector_height,
+                preview, x*Config.hotbarheight,
                 next(colors),
                 parent=self
             )
@@ -64,24 +63,21 @@ class BuildingSelector(HotbarMod):
             )
 
 
-class SelectorOption(pygame.sprite.Sprite, Node):
+class SelectorOption(Node):
     is_hover = False
     is_active = False
 
-    def __init__(self, preview, shift, color, parent=None):
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        Node.__init__(self, parent)
-        self.hotbar_mod = Hotbar.BUILDING_SELECTOR
+    width = Config.hotbarheight
+    height = Config.hotbarheight
 
+    def __init__(self, preview, shift, color, parent=None):
+        Node.__init__(self, parent)
+        self.hotbar_mod = Hotbar.SELECTMOD
         self.default_color = color
         self.hover_color = Config.purple_500
         self.active_color = Config.blue_500
 
         self.preview = preview
-
-        self.image = pygame.Surface(
-            (Config.building_selector_height, Config.building_selector_height))
-        self.rect = self.image.get_rect()
         self.rect.left = shift
         self.paintbar()
 

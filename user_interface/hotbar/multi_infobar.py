@@ -8,7 +8,7 @@ import pygame
 
 
 class MultiInfoBar(HotbarMod):
-    hotbar_mod = Hotbar.MULTI_INFOBAR
+    hotbar_mod = Hotbar.MULTI_INFOMOD
     info_providers = set()
 
     def __init__(self, parent=None):

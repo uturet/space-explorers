@@ -5,7 +5,8 @@ from core.event import (
     MOUSESELECT,
     MOUSEENDSELECT,
     HOTBARINFOMOD,
-    HOTBARMULTIINFOMOD
+    HOTBARMULTIINFOMOD,
+    HOTBARSELECTMOD,
 )
 
 
@@ -19,6 +20,7 @@ class EventManager:
         MOUSEPRESELECT: set(),
         MOUSESELECT: set(),
         MOUSEENDSELECT: set(),
+        HOTBARSELECTMOD: set(),
         HOTBARINFOMOD: set(),
         HOTBARMULTIINFOMOD: set(),
     }
@@ -31,6 +33,7 @@ class EventManager:
         MOUSEPRESELECT: 'handle_mousepreselect',
         MOUSESELECT: 'handle_mouseselect',
         MOUSEENDSELECT: 'handle_mouseendselect',
+        HOTBARSELECTMOD: 'handle_hotbarselectmod',
         HOTBARINFOMOD: 'handle_hotbarinfomod',
         HOTBARMULTIINFOMOD: 'handle_hotbarmultiinfomod',
     }

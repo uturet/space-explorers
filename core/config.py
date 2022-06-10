@@ -8,10 +8,7 @@ class Config(MaterialColors):
     minimapwidth = 200
     minimapheight = 200
     hotbarwidth = 500
-    hotbarheight = 150
-
-    building_selector_width = 480
-    building_selector_height = 130
+    hotbarheight = 130
 
     mouse_tracker_width = 100
     mouse_tracker_height = 100

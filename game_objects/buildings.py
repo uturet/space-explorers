@@ -1,6 +1,7 @@
 import pygame
 from game_objects.object_types import Building, Preview
 from core.config import Config
+from core.event import HOTBARINFOMOD
 
 
 class Transmitter(Building):
@@ -39,6 +40,8 @@ class Transmitter(Building):
         if self in state.mouse_intersected:
             self.is_active = True
             self.paint()
+            pygame.event.post(pygame.event.Event(
+                HOTBARINFOMOD, {'sprite': self}))
         elif self.is_active:
             self.is_active = False
             self.paint()
@@ -63,6 +66,6 @@ class TransmitterPreview(Preview):
                            self.preview_rect.center, self.radius)
 
 
-building_previews = (
-    TransmitterPreview,
-)
+building_previews = {
+    'Transmitter': TransmitterPreview(),
+}
