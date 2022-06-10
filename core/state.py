@@ -25,10 +25,10 @@ class State:
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.bg = ui.Background()
         self.mouse = ui.Mouse()
-        self.hotbar = ui.Hotbar()
+        self.hotbar = ui.hotbar.Hotbar()
         self.minimap = ui.Minimap()
 
-        # seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
+        seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
         # seed_buildings_rand(
         #     200, self, (2000, 2000, Config.width, Config.height))
 
@@ -74,7 +74,8 @@ class State:
         if (self.minimap not in self.mouse_intersected and
             self.hotbar not in self.mouse_intersected and
                 self.mouse.active_mod == self.mouse.INACTIVE):
-            self.grid.pos_intersects(event.pos, self.tmp_group)
+            self.grid.pos_intersects(
+                self.bg.abs_pos_to_bg(*event.pos), self.tmp_group)
             self.mouse_intersected.update(self.tmp_group)
 
     def handle_mousepreselect(self, state, event):
@@ -126,11 +127,11 @@ class State:
         ui.Background._layer = 1
         ui.Mouse._layer = 2
         ui.Minimap._layer = 9
-        ui.Hotbar._layer = 9
+        ui.hotbar.Hotbar._layer = 9
 
         ui.Node.groups = (self.interactable_group)
 
         ui.Mouse.groups = (self.allgroup, self.uigroup)
-        ui.Hotbar.groups = (self.allgroup, self.uigroup)
+        ui.hotbar.Hotbar.groups = (self.allgroup, self.uigroup)
         ui.Background.groups = (self.allgroup)
         ui.Minimap.groups = (self.allgroup, self.uigroup)

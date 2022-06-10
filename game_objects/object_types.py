@@ -34,6 +34,7 @@ class Preview(ABC):
     cover_radius = 0
     radius = 0
     option_radius = 0
+    small_option_radius = 0
 
     color = Config.black
     preview_color = Config.black
@@ -68,6 +69,10 @@ class Preview(ABC):
 
     @abstractmethod
     def draw_option_image(self, image, rect):
+        pass
+
+    @abstractmethod
+    def draw_small_option_image(self, image, rect):
         pass
 
     @abstractmethod

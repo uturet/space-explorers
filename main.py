@@ -22,6 +22,8 @@ class Game:
 
             for tmp_sub in self.state.tmp_group:
                 for event in events:
+                    if hasattr(event, 'pos'):
+                        event.pos = self.state.bg.abs_pos_to_bg(*event.pos)
                     self.state.event_manager.notify_tmp_sub(tmp_sub, event)
 
             self.state.update()

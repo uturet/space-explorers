@@ -28,9 +28,9 @@ class Hotbar(pygame.sprite.Sprite):
             Config.height
         )
 
-        self.selectbar = ui.Selectbar(parent=self)
-        self.infobar = ui.InfoBar(parent=self)
-        self.multi_infobar = ui.MultiInfoBar(parent=self)
+        self.selectbar = ui.hotbar.Selectbar(parent=self)
+        self.infobar = ui.hotbar.InfoBar(parent=self)
+        self.multi_infobar = ui.hotbar.MultiInfoBar(parent=self)
         self.mods = (self.selectbar, self.infobar, self.multi_infobar)
 
     def handle_selected(self, selected=None):
@@ -71,7 +71,6 @@ class Hotbar(pygame.sprite.Sprite):
 
 
 class HotbarMod(ui.Node, ABC):
-    hotbar_mod = None
     width = Config.hotbarwidth
     height = Config.hotbarheight
 
@@ -85,12 +84,3 @@ class HotbarMod(ui.Node, ABC):
 
     def update(self, state):
         pass
-
-    def is_hovered(self, state):
-        return (state.hotbar in state.mouse_intersected and
-                state.hotbar.active_mod_index == self.hotbar_mod and
-                self in state.mouse_intersected)
-
-    def handle_mousewheel(self, state, event):
-        if self.is_hovered(state):
-            pass

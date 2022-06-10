@@ -1,9 +1,12 @@
 import pygame
 from collections import namedtuple
+from core.config import Config
+
 Coords = namedtuple('Coords', 'left top right bottom')
 
 
 class Node(pygame.sprite.Sprite):
+    color = Config.black
 
     def __init__(self, parent=None):
         pygame.sprite.Sprite.__init__(self, self.groups)

@@ -54,6 +54,7 @@ class TransmitterPreview(Preview):
     cover_radius = 100
     radius = Transmitter.radius
     option_radius = 40
+    small_option_radius = 20
 
     color = Config.blue_500
     preview_color = Config.blue_200
@@ -61,7 +62,11 @@ class TransmitterPreview(Preview):
     def draw_option_image(self, image, rect):
         pygame.draw.circle(image, self.color, rect.center, self.option_radius)
 
-    def draw_preview_image(self,):
+    def draw_small_option_image(self, image, rect):
+        pygame.draw.circle(image, self.color, rect.center,
+                           self.small_option_radius)
+
+    def draw_preview_image(self):
         pygame.draw.circle(self.preview_image, self.preview_color,
                            self.preview_rect.center, self.radius)
 

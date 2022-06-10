@@ -1,16 +1,13 @@
-
-from user_interface.hotbar.hotbar import Hotbar, HotbarMod
+from user_interface.hotbar import Hotbar, HotbarMod
+from user_interface import Node
 from game_objects.buildings import building_previews
 from core import collision_handler as ch
-from user_interface.node import Node
 from core.config import Config
 import itertools
 import pygame
 
 
 class Selectbar(HotbarMod):
-
-    hotbar_mod = Hotbar.SELECTMOD
     selected_option = None
 
     def __init__(self, parent=None):
@@ -48,7 +45,7 @@ class Selectbar(HotbarMod):
 
     def handle_mousewheel(self, state, event):
         if (state.hotbar in state.mouse_intersected and
-                state.hotbar.active_mod_index == self.hotbar_mod):
+                state.hotbar.active_mod_index == Hotbar.SELECTMOD):
             self.rect.center = (
                 self.rect.center[0] +
                 ((event.x+event.y) * Config.scroll_speed),
@@ -72,7 +69,6 @@ class SelectorOption(Node):
 
     def __init__(self, preview, shift, color, parent=None):
         Node.__init__(self, parent)
-        self.hotbar_mod = Hotbar.SELECTMOD
         self.default_color = color
         self.hover_color = Config.purple_500
         self.active_color = Config.blue_500
@@ -97,7 +93,7 @@ class SelectorOption(Node):
 
     def handle_mousemotion(self, state, event):
         if (state.hotbar in state.mouse_intersected and
-            state.hotbar.active_mod_index == self.hotbar_mod and
+            state.hotbar.active_mod_index == Hotbar.SELECTMOD and
                 self in state.mouse_intersected):
             self.is_hover = True
             self.paintbar()
@@ -106,7 +102,7 @@ class SelectorOption(Node):
             self.paintbar()
 
     def handle_mousebuttonup(self, state, event):
-        if state.hotbar.active_mod_index != self.hotbar_mod:
+        if state.hotbar.active_mod_index != Hotbar.SELECTMOD:
             return
         if event.button == 1:
             if (state.hotbar in state.mouse_intersected and
