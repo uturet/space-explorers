@@ -117,45 +117,51 @@ class Preview(ABC):
 class Connectoin(pygame.sprite.Sprite):
     groups = ()
 
+    line_width = 4
+
     def __init__(self, start_pos, end_pos):
         rect = ch.rect_from_points(start_pos, end_pos)
-        rect.h = max(1, rect.h)
-        rect.w = max(1, rect.w)
+        rect.h = max(self.line_width, rect.h)
+        rect.w = max(self.line_width, rect.w)
         pygame.sprite.Sprite.__init__(self, self.groups)
         self._image = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+        # self._image.fill((255, 255, 255, 100))
         self.rect = self._image.get_rect()
         self.rect.center = rect.center
 
-        coords = [(0, 0), (self.rect.w, self.rect.h)]
+        coords = ((0, 0), (self.rect.w, self.rect.h))
         if start_pos[0] > end_pos[0]:
             if start_pos[1] < end_pos[1]:
-                coords = [(self.rect.w, 0), (0, self.rect.h)]
+                coords = ((self.rect.w, 0), (0, self.rect.h))
         if start_pos[0] < end_pos[0]:
             if start_pos[1] > end_pos[1]:
-                coords = [(self.rect.w, 0), (0, self.rect.h)]
+                coords = ((self.rect.w, 0), (0, self.rect.h))
 
-        pygame.draw.line(self._image, Config.pink_500, *coords, 4)
+        if rect.h == self.line_width:
+            coords = ((0, rect.h/2), (rect.w, rect.h/2))
+        if rect.w == self.line_width:
+            coords = ((rect.w/2, 0), (rect.w/2, rect.h))
+
+        pygame.draw.line(self._image, Config.pink_500,
+                         *coords, self.line_width)
         self.image = self._image.convert_alpha()
         self.mask = pygame.mask.from_surface(self.image)
 
     def calculate_abs_pos(self, image, pos):
-        end_pos = [0, 0]
+        rect = self.rect.copy()
         center = (100, 100)
-        if pos[0] == self.rect.left:
-            if pos[1] == self.rect.top:
-                self.rect.topleft = center
-                end_pos = self.rect.bottomright
+        if pos[0]-rect.left < self.rect.w/2:
+            if pos[1]-rect.top < self.rect.h/2:
+                rect.topleft = (100, 100)
             else:
-                self.rect.bottomleft = center
-                end_pos = self.rect.topright
+                rect.bottomleft = center
         else:
-            if pos[1] == self.rect.top:
-                self.rect.topright = center
-                end_pos = self.rect.bottomleft
+            if pos[1]-rect.top < self.rect.h/2:
+                rect.topright = center
             else:
-                self.rect.bottomright = center
-                end_pos = self.rect.topleft
-        pygame.draw.line(image, Config.blue_500, center, end_pos, 4)
+                rect.bottomright = center
+
+        image.blit(self.image, rect.topleft)
 
 
 class Particle(pygame.sprite.Sprite):

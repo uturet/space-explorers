@@ -116,7 +116,9 @@ class SelectorOption(Node):
                     state.minimap not in state.mouse_intersected and
                     state.hotbar not in state.mouse_intersected):
                 state.grid.add_item(self.preview.building(
+                    self.preview.lines.copy(),
                     state.mouse.bg_rect.center))
+
         if event.button == 3:
             if (self.is_active and
                     state.minimap not in state.mouse_intersected):

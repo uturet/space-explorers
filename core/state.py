@@ -29,7 +29,7 @@ class State:
         self.hotbar = ui.hotbar.Hotbar()
         self.minimap = ui.Minimap()
 
-        seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
+        # seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
         # seed_buildings_rand(
         #     200, self, (2000, 2000, Config.width, Config.height))
 
@@ -44,7 +44,6 @@ class State:
 
     def update(self):
         self.screen.fill(Config.bg)
-        self.screen.blit(self.screen2, (0, 0))
         self.allgroup.update(self)
 
         self.screengroup.clear()

@@ -11,8 +11,9 @@ class Transmitter(Building):
     hover_color = Config.blue_200
     active_color = Config.green_200
 
-    def __init__(self, pos):
+    def __init__(self, connections, pos):
         super().__init__(pos)
+        self.connections = connections
         self.paint()
 
     def paint(self):
@@ -32,6 +33,9 @@ class Transmitter(Building):
         pass
 
     def draw(self, state):
+        for con in self.connections:
+            state.screen.blit(
+                con.image, state.bg.bg_pos_to_abs(*con.rect.topleft))
         self.paint()
 
     def handle_mousebuttonup(self, state, event):
