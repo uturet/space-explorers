@@ -41,7 +41,7 @@ class Preview(ABC):
 
     color = Config.black
     preview_color = Config.black
-    invalid_preview_color = Config.red_200
+    invalid_preview_color = Config.pink_500
 
     lines = set()
 
@@ -59,25 +59,19 @@ class Preview(ABC):
 
         self.images = []
 
-        image = pygame.Surface(
-            (self.width, self.height), pygame.SRCALPHA)
-        pygame.draw.circle(image, self.preview_color,
-                           self.rect.center, self.radius)
-        converted = image.convert_alpha()
-        self.images.append((converted, pygame.mask.from_surface(converted)))
+        for color in (self.preview_color, self.invalid_preview_color):
+            image = pygame.Surface(
+                (self.width, self.height), pygame.SRCALPHA)
+            pygame.draw.circle(image, color,
+                               self.rect.center, self.radius)
+            converted = image.convert_alpha()
+            self.images.append(
+                (converted, pygame.mask.from_surface(converted)))
 
-        image = pygame.Surface(
-            (self.width, self.height), pygame.SRCALPHA)
-        pygame.draw.circle(image, self.invalid_preview_color,
-                           self.rect.center, self.radius)
-        converted = image.convert_alpha()
-        self.images.append((converted, pygame.mask.from_surface(converted)))
-
-    def update_preview_image(self, valid=True):
-        # self.image.set_alpha(100)
-        self._image.fill((255, 255, 255, 100))
-        for line in self.lines:
-            self.cover_image.blit(line.image, line.rect)
+    def update_preview_image(self, state=None, image=None, valid=True):
+        if state and image and valid:
+            for line in self.lines:
+                line.calculate_abs_pos(image, state.mouse.bg_rect.center)
         if valid:
             self.image = self.images[0][0]
             self.mask = self.images[0][1]
@@ -86,11 +80,11 @@ class Preview(ABC):
             self.mask = self.images[1][1]
 
     @ abstractmethod
-    def draw_option_image(self, image, rect):
+    def draw_option_image(self, rect, image=None):
         pass
 
     @ abstractmethod
-    def draw_small_option_image(self, image, rect):
+    def draw_small_option_image(self, rect, image=None):
         pass
 
     @ abstractmethod
@@ -103,22 +97,21 @@ class Preview(ABC):
 
     def handle_intersections(self, state, intersections):
         self.lines.clear()
-        for sp in intersections:
-            if isinstance(sp, Building) and \
+        exclude_lines = set()
+        for spr in intersections:
+            if (isinstance(spr, Building) and
                 ch.circle_intersects_circle(
                     state.mouse.bg_rect.center, self.cover_radius,
-                    sp.rect.center, sp.radius
-            ):
-                pos = state.bg.bg_pos_to_abs(sp.rect.centerx, sp.rect.centery)
-                pos = (
-                    pos[0]-state.mouse.rect.centerx+self.rect.centerx,
-                    pos[1]-state.mouse.rect.centery+self.rect.centery
-                )
-
-                connection = Connectoin(self.rect.center, pos)
-                col = pygame.sprite.collide_mask(sp, connection)
-                if not col:
-                    self.lines.add(connection)
+                    spr.rect.center, spr.radius
+            )):
+                connection = Connectoin(
+                    state.mouse.bg_rect.center, spr.rect.center)
+                self.lines.add(connection)
+                for i in intersections:
+                    if i != spr:
+                        if pygame.sprite.collide_mask(i, connection):
+                            exclude_lines.add(connection)
+            self.lines -= exclude_lines
 
 
 class Connectoin(pygame.sprite.Sprite):
@@ -126,12 +119,43 @@ class Connectoin(pygame.sprite.Sprite):
 
     def __init__(self, start_pos, end_pos):
         rect = ch.rect_from_points(start_pos, end_pos)
+        rect.h = max(1, rect.h)
+        rect.w = max(1, rect.w)
         pygame.sprite.Sprite.__init__(self, self.groups)
-        self.image = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
-        self.rect = self.image.get_rect()
+        self._image = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+        self.rect = self._image.get_rect()
         self.rect.center = rect.center
-        pygame.draw.line(self.image, Config.pink_500, start_pos, end_pos)
+
+        coords = [(0, 0), (self.rect.w, self.rect.h)]
+        if start_pos[0] > end_pos[0]:
+            if start_pos[1] < end_pos[1]:
+                coords = [(self.rect.w, 0), (0, self.rect.h)]
+        if start_pos[0] < end_pos[0]:
+            if start_pos[1] > end_pos[1]:
+                coords = [(self.rect.w, 0), (0, self.rect.h)]
+
+        pygame.draw.line(self._image, Config.pink_500, *coords, 4)
+        self.image = self._image.convert_alpha()
         self.mask = pygame.mask.from_surface(self.image)
+
+    def calculate_abs_pos(self, image, pos):
+        end_pos = [0, 0]
+        center = (100, 100)
+        if pos[0] == self.rect.left:
+            if pos[1] == self.rect.top:
+                self.rect.topleft = center
+                end_pos = self.rect.bottomright
+            else:
+                self.rect.bottomleft = center
+                end_pos = self.rect.topright
+        else:
+            if pos[1] == self.rect.top:
+                self.rect.topright = center
+                end_pos = self.rect.bottomleft
+            else:
+                self.rect.bottomright = center
+                end_pos = self.rect.topleft
+        pygame.draw.line(image, Config.blue_500, center, end_pos, 4)
 
 
 class Particle(pygame.sprite.Sprite):
@@ -162,9 +186,9 @@ class Particle(pygame.sprite.Sprite):
                 Bounding Volume Hierarchies
         """
         """Continuous collision detection"""
-        if self.left[0] <= box.left[0] or \
-                self.right[0] >= box.right[0]:
+        if (self.left[0] <= box.left[0] or
+                self.right[0] >= box.right[0]):
             self.vel[0] = -self.vel[0]
-        if self.bottom[1] <= box.bottom[1] or \
-                self.top[1] >= box.top[1]:
+        if (self.bottom[1] <= box.bottom[1] or
+                self.top[1] >= box.top[1]):
             self.vel[1] = -self.vel[1]

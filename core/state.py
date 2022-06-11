@@ -44,6 +44,7 @@ class State:
 
     def update(self):
         self.screen.fill(Config.bg)
+        self.screen.blit(self.screen2, (0, 0))
         self.allgroup.update(self)
 
         self.screengroup.clear()

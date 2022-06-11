@@ -42,7 +42,6 @@ class Mouse(pygame.sprite.Sprite):
 
         self.preview = preview
         self.preview.update_preview_image()
-        self.image.blit(self.preview.image, self.rect.center)
 
     def clear_preview(self):
         self.active_mod = self.INACTIVE
@@ -72,14 +71,12 @@ class Mouse(pygame.sprite.Sprite):
 
             valid = True
             for spr in self.intersections:
-                col = pygame.sprite.collide_mask(spr, self.preview)
-                if col:
-                    print(col)
+                if pygame.sprite.collide_mask(spr, self.preview):
                     valid = False
                     break
             if valid:
                 self.preview.handle_intersections(state, self.intersections)
-            self.preview.update_preview_image(valid)
+            self.preview.update_preview_image(state, self.image, valid)
             self.image.blit(self.preview.image, self.center_point)
 
         elif self.active_mod == self.SELECT:

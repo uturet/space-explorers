@@ -18,7 +18,6 @@ class Transmitter(Building):
     def paint(self):
         pygame.draw.circle(self._image, self.color,
                            (self.radius, self.radius), self.radius)
-
         if self.is_hover:
             pygame.draw.circle(self._image, self.hover_color,
                                (self.radius, self.radius), self.radius, 2
@@ -61,14 +60,21 @@ class TransmitterPreview(Preview):
     color = Config.blue_500
     preview_color = Config.blue_200
 
-    def draw_option_image(self, image, rect):
-        pygame.draw.circle(self.option_image, self.color,
-                           rect.center, self.option_radius)
-        image.blit(self.option_image, self.option_rect)
+    def draw_option_image(self, rect, image=None):
+        if image:
+            pygame.draw.circle(image, self.color,
+                               rect.center, self.option_radius)
+        else:
+            pygame.draw.circle(self.option_image, self.color,
+                               rect.center, self.option_radius)
 
-    def draw_small_option_image(self, image, rect):
-        pygame.draw.circle(image, self.color, rect.center,
-                           self.small_option_radius)
+    def draw_small_option_image(self, rect, image=None):
+        if image:
+            pygame.draw.circle(image, self.color, rect.center,
+                               self.small_option_radius)
+        else:
+            pygame.draw.circle(self.option_image, self.color, rect.center,
+                               self.small_option_radius)
 
     def draw_preview_image(self):
         pygame.draw.circle(self._image, self.preview_color,
