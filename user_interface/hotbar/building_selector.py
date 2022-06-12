@@ -116,7 +116,7 @@ class SelectorOption(Node):
                     state.minimap not in state.mouse_intersected and
                     state.hotbar not in state.mouse_intersected and
                     self.preview.valid):
-                state.grid.add_item(self.preview.building(
+                state.add_gameobj(self.preview.building(
                     self.preview.connections.copy(),
                     state.mouse.bg_rect.center))
 

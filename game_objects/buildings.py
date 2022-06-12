@@ -12,8 +12,8 @@ class Transmitter(Building):
     hover_color = Config.blue_200
     active_color = Config.green_200
 
-    def __init__(self, building_con, pos):
-        super().__init__(building_con, pos)
+    def __init__(self, building_con, pos, type=0):
+        super().__init__(building_con, pos, type)
         self.paint()
 
     def paint(self):
@@ -53,8 +53,8 @@ class Transmitter(Building):
         if self.is_active:
             self.is_active = False
             self.paint()
-            for con in self.building_con.values():
-                con.deactivate()
+        for con in self.building_con.values():
+            con.deactivate()
 
 
 class TransmitterPreview(Preview):

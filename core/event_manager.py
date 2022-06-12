@@ -7,6 +7,7 @@ from core.event import (
     HOTBARINFOMOD,
     HOTBARMULTIINFOMOD,
     HOTBARSELECTMOD,
+    HIGLIGHT,
 )
 
 
@@ -23,6 +24,7 @@ class EventManager:
         HOTBARSELECTMOD: set(),
         HOTBARINFOMOD: set(),
         HOTBARMULTIINFOMOD: set(),
+        HIGLIGHT: set(),
     }
 
     handler_names = {
@@ -36,6 +38,7 @@ class EventManager:
         HOTBARSELECTMOD: 'handle_hotbarselectmod',
         HOTBARINFOMOD: 'handle_hotbarinfomod',
         HOTBARMULTIINFOMOD: 'handle_hotbarmultiinfomod',
+        HIGLIGHT: 'handle_higlight',
     }
 
     def __init__(self, state):

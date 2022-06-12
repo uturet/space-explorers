@@ -6,13 +6,20 @@ from core.animation import Frame
 
 
 class Building(pygame.sprite.Sprite):
+    LATENT = 0
+    CONSUMER = 1
+    PRODUCER = 2
+    type = LATENT
+
     size = 0
     is_hover = False
     is_active = False
     building_con = {}
 
-    def __init__(self,  building_con, pos):
+    def __init__(self,  building_con, pos, type=LATENT):
         pygame.sprite.Sprite.__init__(self, self.groups)
+        if type in (self.LATENT, self.CONSUMER, self.PRODUCER):
+            self.type = type
         self.building_con = building_con
         for building, con in building_con.items():
             building.add_connection(self, con)

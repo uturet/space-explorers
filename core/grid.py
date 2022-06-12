@@ -90,8 +90,8 @@ class Grid:
             for y in range(math.ceil(Config.bigmapheight/Config.chunk_size)):
                 pygame.draw.rect(
                     image,
-                    Config.amber_500,
+                    Config.blue_800,
                     (x*Config.chunk_size, y*Config.chunk_size,
                      Config.chunk_size, Config.chunk_size),
-                    2
+                    1
                 )

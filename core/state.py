@@ -1,18 +1,22 @@
 import pygame
 from core.config import Config
 import user_interface as ui
-from game_objects import Transmitter
+from game_objects.buildings import Transmitter
+from game_objects.object_type import Building
 from core.event_manager import EventManager
 from core import collision_handler as ch
 from core.grid import Grid
 from seeder import seed_buildings_rand
-from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD
+from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
 from game_objects.buildings import building_previews, TransmitterPreview
+from core.path_manager import PathManager
+import random
 
 
 class State:
     milliseconds = 0
     seconds = 0
+    secounds_past = 0
     mouse_intersected = set()
     mouse_select = set()
     tmp_group = set()
@@ -24,15 +28,24 @@ class State:
 
         self.event_manager = EventManager(self)
         self.grid = Grid()
+        self.path_manager = PathManager()
 
         self.bg = ui.Background()
         self.mouse = ui.Mouse()
         self.hotbar = ui.hotbar.Hotbar()
         self.minimap = ui.Minimap()
+        t = Transmitter({}, (100, 100), Transmitter.CONSUMER)
+        t.color = Config.green_500
+        self.add_gameobj(t)
+        t = Transmitter({}, (400, 400), Transmitter.PRODUCER)
+        t.color = Config.pink_500
+        self.add_gameobj(t)
 
         # seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
         # seed_buildings_rand(
         #     200, self, (2000, 2000, Config.width, Config.height))
+
+        pygame.time.set_timer(HIGLIGHT, 1000)
 
         self.event_manager.add_group(
             self,
@@ -43,13 +56,34 @@ class State:
         )
         self.screen.blit(self.bg.image, self.bg.rect)
 
+    def handle_higlight(self, state, event):
+        self.secounds_past += self.seconds
+
+        for spr in self.gamegroup:
+            spr.deactivate()
+
+        for consumer, producers in self.path_manager.producers.items():
+            if not len(producers):
+                continue
+
+            for paths in producers.values():
+                path = paths[random.randint(0, len(paths)-1)]
+                for i, v in enumerate(path):
+                    if i == 0:
+                        consumer.building_con[v].activate()
+                    if i < (len(path)-1):
+                        try:
+                            v.building_con[path[i+1]].activate()
+                        except Exception:
+                            pass
+
     def update(self):
         self.screen.fill(Config.bg)
         self.allgroup.update(self)
 
         self.screengroup.clear()
         self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
-        # self.grid.draw_grid(self.screen)
+        self.grid.draw_grid(self.screen)
 
         for spr in self.screengroup:
             spr.draw(self)
@@ -138,3 +172,8 @@ class State:
         ui.Minimap.groups = (self.allgroup, self.uigroup)
 
         building_previews['Transmitter'] = TransmitterPreview()
+
+    def add_gameobj(self, obj):
+        self.grid.add_item(obj)
+        if isinstance(obj, Building):
+            self.path_manager.add_building(obj)
