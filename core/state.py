@@ -18,7 +18,8 @@ class State:
     tmp_group = set()
 
     def __init__(self):
-        self.screen = pygame.display.set_mode((Config.width, Config.height))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        # self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.set_group_attachmet()
 
         self.event_manager = EventManager(self)
@@ -82,8 +83,7 @@ class State:
     def handle_mousepreselect(self, state, event):
         self.mouse_select.clear()
         for spr in self.gamegroup:
-            spr.is_hover = False
-            spr.is_active = False
+            spr.deactivate()
 
     def handle_mouseselect(self, state, event):
         prev_select = self.mouse_select.copy()

@@ -20,6 +20,7 @@ class MultiInfoBar(HotbarMod):
 
     def set_info_providers(self, sprites):
         self.info_providers = sprites
+        [spr.activate() for spr in sprites]
         for p in self._previews:
             p.kill()
         self._previews.clear()

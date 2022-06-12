@@ -33,23 +33,15 @@ class Hotbar(pygame.sprite.Sprite):
         self.multi_infobar = ui.hotbar.MultiInfoBar(parent=self)
         self.mods = (self.selectbar, self.infobar, self.multi_infobar)
 
-    def handle_selected(self, selected=None):
-        if selected is None:
-            self.active_mod_index = self.DEFAULT_MOD
-        elif isinstance(selected, Building):
-            self.active_mod_index = self.INFOMOD
-        elif type(selected) is list:
-            self.active_mod_index = self.MULTI_INFOMOD
-
     def handle_hotbarselectmod(self, state, event):
-        self.active_mod_index = self.SELECTMOD
+        self.set_active_mod(self.SELECTMOD)
 
     def handle_hotbarinfomod(self, state, event):
-        self.active_mod_index = self.INFOMOD
+        self.set_active_mod(self.INFOMOD)
         self.active_mod.set_info_provider(event.sprite)
 
     def handle_hotbarmultiinfomod(self, state, event):
-        self.active_mod_index = self.MULTI_INFOMOD
+        self.set_active_mod(self.MULTI_INFOMOD)
         self.active_mod.set_info_providers(event.sprites)
 
     def set_active_mod(self, mod_index):

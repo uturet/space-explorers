@@ -1,9 +1,10 @@
 import os
 from static.colors import MaterialColors
+import pygame
 
 
 class Config(MaterialColors):
-    width = 960
+    width = 1920
     height = 1080
     minimapwidth = 200
     minimapheight = 200
@@ -35,4 +36,7 @@ class Config(MaterialColors):
 
     @classmethod
     def set_default_window_position(cls):
+        x = 2560
+        y = 1440 - 1080
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (2560 - cls.width, 0)
+        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{x},{y}"

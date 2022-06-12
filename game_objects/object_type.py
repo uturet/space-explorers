@@ -2,15 +2,21 @@ import pygame
 from abc import ABC, abstractmethod
 from core.config import Config
 from core import collision_handler as ch
+from core.animation import Frame
 
 
 class Building(pygame.sprite.Sprite):
     size = 0
     is_hover = False
     is_active = False
+    building_con = {}
 
-    def __init__(self, pos):
+    def __init__(self,  building_con, pos):
         pygame.sprite.Sprite.__init__(self, self.groups)
+        self.building_con = building_con
+        for building, con in building_con.items():
+            building.add_connection(self, con)
+            con.connects.add(self)
         self._image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
         self.rect = self._image.get_rect()
         self.rect.center = pos
@@ -19,6 +25,18 @@ class Building(pygame.sprite.Sprite):
 
     def draw(self, state):
         pass
+
+    def activate(self):
+        pass
+
+    def deacticate(self):
+        pass
+
+    def add_connection(self, building, con):
+        self.building_con[building] = con
+
+    def remove_connection(self, building):
+        del self.building_con[building]
 
     @classmethod
     def get_option_image(cls):
@@ -31,11 +49,12 @@ class Building(pygame.sprite.Sprite):
 
 class Preview(ABC):
     building = None
+    valid = True
 
     height = 0
     width = 0
-    cover_size = 0
-    cover_radius = 0
+    cover_size = 200
+    cover_radius = 100
     option_radius = 0
     small_option_radius = 0
 
@@ -43,7 +62,7 @@ class Preview(ABC):
     preview_color = Config.black
     invalid_preview_color = Config.pink_500
 
-    lines = set()
+    connections = {}
 
     def __init__(self):
         self._image = pygame.Surface(
@@ -57,27 +76,24 @@ class Preview(ABC):
         self.cover_rect = self.cover_image.get_rect()
         self.rect = self._image.get_rect()
 
-        self.images = []
-
-        for color in (self.preview_color, self.invalid_preview_color):
-            image = pygame.Surface(
-                (self.width, self.height), pygame.SRCALPHA)
-            pygame.draw.circle(image, color,
-                               self.rect.center, self.radius)
-            converted = image.convert_alpha()
-            self.images.append(
-                (converted, pygame.mask.from_surface(converted)))
+        self.frames = []
+        self.create_preview_frames()
 
     def update_preview_image(self, state=None, image=None, valid=True):
+        self.valid = valid
         if state and image and valid:
-            for line in self.lines:
+            for line in self.connections.values():
                 line.calculate_abs_pos(image, state.mouse.bg_rect.center)
         if valid:
-            self.image = self.images[0][0]
-            self.mask = self.images[0][1]
+            self.image = self.frames[0].image
+            self.mask = self.frames[0].mask
         else:
-            self.image = self.images[1][0]
-            self.mask = self.images[1][1]
+            self.image = self.frames[1].image
+            self.mask = self.frames[1].mask
+
+    @abstractmethod
+    def create_preview_frames(self):
+        pass
 
     @ abstractmethod
     def draw_option_image(self, rect, image=None):
@@ -87,17 +103,8 @@ class Preview(ABC):
     def draw_small_option_image(self, rect, image=None):
         pass
 
-    @ abstractmethod
-    def draw_preview_image(self):
-        pass
-
-    @ abstractmethod
-    def draw_invalid_preview_image(self):
-        pass
-
     def handle_intersections(self, state, intersections):
-        self.lines.clear()
-        exclude_lines = set()
+        self.connections.clear()
         for spr in intersections:
             if (isinstance(spr, Building) and
                 ch.circle_intersects_circle(
@@ -105,47 +112,57 @@ class Preview(ABC):
                     spr.rect.center, spr.radius
             )):
                 connection = Connectoin(
-                    state.mouse.bg_rect.center, spr.rect.center)
-                self.lines.add(connection)
+                    state.mouse.bg_rect.center, spr)
+                self.connections[spr] = connection
                 for i in intersections:
                     if i != spr:
-                        if pygame.sprite.collide_mask(i, connection):
-                            exclude_lines.add(connection)
-            self.lines -= exclude_lines
+                        if (pygame.sprite.collide_mask(i, connection) and
+                                i in self.connections):
+                            del self.connections[i]
 
 
 class Connectoin(pygame.sprite.Sprite):
     groups = ()
-
+    connects = set()
     line_width = 4
 
-    def __init__(self, start_pos, end_pos):
+    def __init__(self, start_pos, spr):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.connects = {spr}
+        end_pos = spr.rect.center
+
         rect = ch.rect_from_points(start_pos, end_pos)
         rect.h = max(self.line_width, rect.h)
         rect.w = max(self.line_width, rect.w)
-        pygame.sprite.Sprite.__init__(self, self.groups)
-        self._image = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
-        # self._image.fill((255, 255, 255, 100))
-        self.rect = self._image.get_rect()
-        self.rect.center = rect.center
 
-        coords = ((0, 0), (self.rect.w, self.rect.h))
-        if start_pos[0] > end_pos[0]:
-            if start_pos[1] < end_pos[1]:
-                coords = ((self.rect.w, 0), (0, self.rect.h))
-        if start_pos[0] < end_pos[0]:
-            if start_pos[1] > end_pos[1]:
-                coords = ((self.rect.w, 0), (0, self.rect.h))
+        self.frames = []
 
-        if rect.h == self.line_width:
-            coords = ((0, rect.h/2), (rect.w, rect.h/2))
-        if rect.w == self.line_width:
-            coords = ((rect.w/2, 0), (rect.w/2, rect.h))
+        coords = self.calculate_bg_pos(rect, start_pos, end_pos)
+        for i, color in enumerate((Config.indigo_300, Config.orange_400)):
+            image = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            self.rect = image.get_rect()
+            self.rect.center = rect.center
+            pygame.draw.line(image, color,
+                             *coords, int(self.line_width))
+            converted = image.convert_alpha()
+            self.frames.append(
+                Frame(converted, pygame.mask.from_surface(converted)))
 
-        pygame.draw.line(self._image, Config.pink_500,
-                         *coords, self.line_width)
-        self.image = self._image.convert_alpha()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = self.frames[0].image
+        self.mask = self.frames[0].mask
+
+    def activate(self):
+        self.image = self.frames[1].image
+        self.mask = self.frames[1].mask
+
+    def deactivate(self):
+        self.image = self.frames[0].image
+        self.mask = self.frames[0].mask
+
+    def draw(self, state):
+        state.screen.blit(
+            self.image, state.bg.bg_pos_to_abs(*self.rect.topleft))
 
     def calculate_abs_pos(self, image, pos):
         rect = self.rect.copy()
@@ -162,6 +179,20 @@ class Connectoin(pygame.sprite.Sprite):
                 rect.bottomright = center
 
         image.blit(self.image, rect.topleft)
+
+    def calculate_bg_pos(self, rect, start_pos, end_pos):
+        coords = ((0, 0), (rect.w, rect.h))
+        if start_pos[0] > end_pos[0]:
+            if start_pos[1] < end_pos[1]:
+                coords = ((rect.w, 0), (0, rect.h))
+        if start_pos[0] < end_pos[0]:
+            if start_pos[1] > end_pos[1]:
+                coords = ((rect.w, 0), (0, rect.h))
+        if rect.h == self.line_width:
+            coords = ((0, rect.h/2), (rect.w, rect.h/2))
+        if rect.w == self.line_width:
+            coords = ((rect.w/2, 0), (rect.w/2, rect.h))
+        return coords
 
 
 class Particle(pygame.sprite.Sprite):

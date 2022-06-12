@@ -114,9 +114,10 @@ class SelectorOption(Node):
                     state.hotbar.active_mod.set_selected_option(state, self)
             elif (self.is_active and
                     state.minimap not in state.mouse_intersected and
-                    state.hotbar not in state.mouse_intersected):
+                    state.hotbar not in state.mouse_intersected and
+                    self.preview.valid):
                 state.grid.add_item(self.preview.building(
-                    self.preview.lines.copy(),
+                    self.preview.connections.copy(),
                     state.mouse.bg_rect.center))
 
         if event.button == 3:
