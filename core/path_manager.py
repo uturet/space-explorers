@@ -10,11 +10,11 @@ class PathManager:
     visited = set()
 
     def add_building(self, building):
-        if building.type == Building.LATENT:
+        if building.ei_type == Building.LATENT:
             self.update_paths()
-        elif building.type == Building.CONSUMER:
+        elif building.ei_type == Building.CONSUMER:
             self.add_consumer(building)
-        elif building.type == Building.PRODUCER:
+        elif building.ei_type == Building.PRODUCER:
             self.add_producer(building)
         self.visited.clear()
 
@@ -34,31 +34,29 @@ class PathManager:
         for producer in self.producers:
             self.producers[producer] = self.dfs(producer)
 
-    def dfs(self, building, path=None, entrypoint=True):
+    def find_path(self, building):
         has_end = False
-        if entrypoint:
-            self.visited.add(building)
-            paths = {}
+        self.visited.add(building)
+        paths = {}
+        for con in building.building_con:
+            path = deque()
+            self.dfs(con, path, False)
+            if path or has_end:
+                has_end = False
+                path.appendleft(con)
+                if path[-1] not in paths:
+                    paths[path[-1]] = []
+                paths[path[-1]].append(path)
+        return paths
+
+    def dfs(self, building, path=None, entrypoint=True):
+        self.visited.add(building)
         for con in building.building_con:
             if con.type == Building.CONSUMER:
                 path.appendleft(con)
-                has_end = True
+                return True
             if con in self.visited:
                 continue
-            self.visited.add(con)
-            if entrypoint:
-                path = deque()
-                self.dfs(con, path, False)
-                if path or has_end:
-                    has_end = False
-                    path.appendleft(con)
-                    if path[-1] not in paths:
-                        paths[path[-1]] = []
-                    paths[path[-1]].append(path)
-            elif not has_end:
-                if self.dfs(con, path, False):
-                    path.appendleft(con)
-                    return True
-        if entrypoint:
-            return paths
-        return has_end
+            if self.dfs(con, path, False):
+                path.appendleft(con)
+                return True

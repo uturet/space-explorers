@@ -1,11 +1,10 @@
 import os
 from static.colors import MaterialColors
-import pygame
 
 
 class Config(MaterialColors):
     width = 1920
-    height = 1080
+    height = 1010
     minimapwidth = 200
     minimapheight = 200
     hotbarwidth = 500

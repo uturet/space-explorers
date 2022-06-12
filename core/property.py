@@ -31,3 +31,22 @@ class Movement:
         if self.rect.bottom <= box.bottom or \
                 self.rect.top >= box.top:
             self.speed[1] = -self.speed[1]
+
+
+class EnergyInteraction:
+    LATENT = 0
+    CONSUMER = 1
+    PRODUCER = 2
+    _ei_type = LATENT
+
+    @property
+    def ei_type(self):
+        return self._ei_type
+
+    @ei_type.setter
+    def ei_type(self, i):
+        if i in (self.LATENT, self.CONSUMER, self.PRODUCER):
+            self._ei_type = i
+        else:
+            raise Exception(
+                f'Invalid {self.__class__.__name___}.type. Should be one of {",".join(self.LATENT, self.CONSUMER, self.PRODUCER)}, given {i}')

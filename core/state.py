@@ -8,7 +8,7 @@ from core import collision_handler as ch
 from core.grid import Grid
 from seeder import seed_buildings_rand
 from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
-from game_objects.buildings import building_previews, TransmitterPreview
+from game_objects.buildings import building_previews, TransmitterPreview, GeneratorPreview
 from core.path_manager import PathManager
 import random
 
@@ -22,8 +22,8 @@ class State:
     tmp_group = set()
 
     def __init__(self):
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        # self.screen = pygame.display.set_mode((Config.width, Config.height))
+        # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.set_group_attachmet()
 
         self.event_manager = EventManager(self)
@@ -34,18 +34,8 @@ class State:
         self.mouse = ui.Mouse()
         self.hotbar = ui.hotbar.Hotbar()
         self.minimap = ui.Minimap()
-        t = Transmitter({}, (100, 100), Transmitter.CONSUMER)
-        t.color = Config.green_500
-        self.add_gameobj(t)
-        t = Transmitter({}, (400, 400), Transmitter.PRODUCER)
-        t.color = Config.pink_500
-        self.add_gameobj(t)
 
-        # seed_buildings_rand(200, self, (0, 0, Config.width, Config.height))
-        # seed_buildings_rand(
-        #     200, self, (2000, 2000, Config.width, Config.height))
-
-        pygame.time.set_timer(HIGLIGHT, 1000)
+        # pygame.time.set_timer(HIGLIGHT, 1000)
 
         self.event_manager.add_group(
             self,
@@ -86,7 +76,6 @@ class State:
         self.grid.draw_grid(self.screen)
 
         for spr in self.screengroup:
-            spr.draw(self)
             self.screen.blit(
                 spr.image, self.bg.bg_pos_to_abs(
                     spr.rect.left, spr.rect.top))
@@ -155,9 +144,9 @@ class State:
         self.interactable_group = pygame.sprite.Group()
         self.gamegroup = pygame.sprite.Group()
 
-        Transmitter._layer = 3
+        Building._layer = 3
 
-        Transmitter.groups = (self.allgroup, self.gamegroup)
+        Building.groups = (self.allgroup, self.gamegroup)
 
         ui.Background._layer = 1
         ui.Mouse._layer = 2
@@ -172,6 +161,7 @@ class State:
         ui.Minimap.groups = (self.allgroup, self.uigroup)
 
         building_previews['Transmitter'] = TransmitterPreview()
+        building_previews['Generator'] = GeneratorPreview()
 
     def add_gameobj(self, obj):
         self.grid.add_item(obj)

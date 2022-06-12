@@ -2,42 +2,52 @@ import pygame
 from abc import ABC, abstractmethod
 from core.config import Config
 from core import collision_handler as ch
-from core.animation import Frame
+from core.property import EnergyInteraction
+from core.event import HOTBARINFOMOD
+from core.animation import ColorFrameList
 
 
-class Building(pygame.sprite.Sprite):
-    LATENT = 0
-    CONSUMER = 1
-    PRODUCER = 2
-    type = LATENT
+class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 
-    size = 0
-    is_hover = False
-    is_active = False
-    building_con = {}
+    INACTIVE = 0
+    HOVERED = 1
+    SELECTED = 2
 
-    def __init__(self,  building_con, pos, type=LATENT):
+    _status = INACTIVE
+
+    building_con = None
+    hover_color = Config.blue_200
+    active_color = Config.green_200
+
+    def __init__(self,  building_con, pos):
         pygame.sprite.Sprite.__init__(self, self.groups)
-        if type in (self.LATENT, self.CONSUMER, self.PRODUCER):
-            self.type = type
         self.building_con = building_con
         for building, con in building_con.items():
             building.add_connection(self, con)
             con.connects.add(self)
-        self._image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-        self.rect = self._image.get_rect()
-        self.rect.center = pos
-        self.paint()
-        self.mask = pygame.mask.from_surface(self._image)
 
-    def draw(self, state):
-        pass
+        self.colors = (self.color, self.hover_color, self.active_color)
+        self.create_frames(center=pos)
+        self.select_frame(0)
 
-    def activate(self):
-        pass
+    @property
+    def status(self):
+        return self._status
 
-    def deacticate(self):
-        pass
+    @status.setter
+    def status(self, i):
+        if i in (self.INACTIVE, self.HOVERED, self.SELECTED):
+            self._status = i
+        else:
+            raise Exception(
+                f'Invalid {self.__class__.__name___}.status. Should be one of {(self.INACTIVE, self.HOVERED, self.SELECTED)}, given {i}')
+
+    def handle_mousebuttonup(self, state, event):
+        if (self in state.mouse_intersected
+                and self._status != self.SELECTED):
+            self._status = self.SELECTED
+            pygame.event.post(pygame.event.Event(
+                HOTBARINFOMOD, {'sprite': self}))
 
     def add_connection(self, building, con):
         self.building_con[building] = con
@@ -54,53 +64,43 @@ class Building(pygame.sprite.Sprite):
         pass
 
 
-class Preview(ABC):
+class Preview(ABC, ColorFrameList):
     building = None
     valid = True
 
-    height = 0
-    width = 0
     cover_size = 200
     cover_radius = 100
-    option_radius = 0
-    small_option_radius = 0
+    option_radius = 40
+    small_option_radius = option_radius/2
 
-    color = Config.black
     preview_color = Config.black
     invalid_preview_color = Config.pink_500
 
-    connections = {}
+    connections = None
 
     def __init__(self):
-        self._image = pygame.Surface(
-            (self.width, self.height), pygame.SRCALPHA)
+        self.connections = {}
+        self.width = self.building.width
+        self.height = self.building.height
+        self.radius = self.building.radius
+        self.color = self.building.color
+        self.colors = (self.preview_color, self.invalid_preview_color)
+
         self.option_image = pygame.Surface(
             (Config.hotbarheight, Config.hotbarheight), pygame.SRCALPHA)
-        self.cover_image = pygame.Surface(
-            (self.cover_size, self.cover_size), pygame.SRCALPHA)
-
         self.option_rect = self.option_image.get_rect()
-        self.cover_rect = self.cover_image.get_rect()
-        self.rect = self._image.get_rect()
 
-        self.frames = []
-        self.create_preview_frames()
+        self.create_frames()
+        self.select_frame(0)
 
     def update_preview_image(self, state=None, image=None, valid=True):
-        self.valid = valid
         if state and image and valid:
             for line in self.connections.values():
                 line.calculate_abs_pos(image, state.mouse.bg_rect.center)
         if valid:
-            self.image = self.frames[0].image
-            self.mask = self.frames[0].mask
+            self.select_frame(0)
         else:
-            self.image = self.frames[1].image
-            self.mask = self.frames[1].mask
-
-    @abstractmethod
-    def create_preview_frames(self):
-        pass
+            self.select_frame(1)
 
     @ abstractmethod
     def draw_option_image(self, rect, image=None):
@@ -128,9 +128,9 @@ class Preview(ABC):
                             del self.connections[i]
 
 
-class Connectoin(pygame.sprite.Sprite):
+class Connectoin(pygame.sprite.Sprite, ColorFrameList):
     groups = ()
-    connects = set()
+    connects = None
     line_width = 4
 
     def __init__(self, start_pos, spr):
@@ -143,33 +143,23 @@ class Connectoin(pygame.sprite.Sprite):
         rect.h = max(self.line_width, rect.h)
         rect.w = max(self.line_width, rect.w)
 
-        self.frames = []
+        self.width = rect.w
+        self.height = rect.h
+        self.colors = (Config.indigo_300, Config.orange_400)
+        self.coords = self.calculate_bg_pos(rect, start_pos, end_pos)
 
-        coords = self.calculate_bg_pos(rect, start_pos, end_pos)
-        for i, color in enumerate((Config.indigo_300, Config.orange_400)):
-            image = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
-            self.rect = image.get_rect()
-            self.rect.center = rect.center
-            pygame.draw.line(image, color,
-                             *coords, int(self.line_width))
-            converted = image.convert_alpha()
-            self.frames.append(
-                Frame(converted, pygame.mask.from_surface(converted)))
+        self.create_frames(center=rect.center)
+        self.select_frame(0)
 
-        self.image = self.frames[0].image
-        self.mask = self.frames[0].mask
+    def draw_frame(self, image, color):
+        pygame.draw.line(image, color,
+                         *self.coords, int(self.line_width))
 
     def activate(self):
-        self.image = self.frames[1].image
-        self.mask = self.frames[1].mask
+        self.select_frame(1)
 
     def deactivate(self):
-        self.image = self.frames[0].image
-        self.mask = self.frames[0].mask
-
-    def draw(self, state):
-        state.screen.blit(
-            self.image, state.bg.bg_pos_to_abs(*self.rect.topleft))
+        self.select_frame(0)
 
     def calculate_abs_pos(self, image, pos):
         rect = self.rect.copy()
