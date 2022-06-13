@@ -95,8 +95,7 @@ class Preview(ABC, ColorFrameList):
 
     def update_preview_image(self, state=None, image=None, valid=True):
         if state and image and valid:
-            for line in self.connections.values():
-                line.calculate_abs_pos(image, state.mouse.bg_rect.center)
+            state.tmp_preview_group.update(self.connections.values())
         if valid:
             self.select_frame(0)
         else:
@@ -132,21 +131,22 @@ class Connectoin(pygame.sprite.Sprite, ColorFrameList):
     groups = ()
     connects = None
     line_width = 4
+    width = Preview.cover_size
+    height = Preview.cover_size
 
     def __init__(self, start_pos, spr):
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.connects = {spr}
-        end_pos = spr.rect.center
+        end_pos = (spr.rect.centerx - start_pos[0] + Preview.cover_radius,
+                   spr.rect.centery - start_pos[1] + Preview.cover_radius)
+        rect = pygame.Rect(
+            start_pos[0]-Preview.cover_radius,
+            start_pos[1]-Preview.cover_radius,
+            Preview.cover_size, Preview.cover_size)
 
-        rect = ch.rect_from_points(start_pos, end_pos)
-        rect.h = max(self.line_width, rect.h)
-        rect.w = max(self.line_width, rect.w)
-
-        self.width = rect.w
-        self.height = rect.h
-        self.colors = (Config.indigo_300, Config.orange_400)
-        self.coords = self.calculate_bg_pos(rect, start_pos, end_pos)
+        self.colors = (Config.indigo_500, Config.orange_500)
+        self.coords = ((Preview.cover_radius, Preview.cover_radius), end_pos)
 
         self.create_frames(center=rect.center)
         self.select_frame(0)
@@ -155,41 +155,14 @@ class Connectoin(pygame.sprite.Sprite, ColorFrameList):
         pygame.draw.line(image, color,
                          *self.coords, int(self.line_width))
 
+    def calculate_bg_abs(self, pos):
+        return
+
     def activate(self):
         self.select_frame(1)
 
     def deactivate(self):
         self.select_frame(0)
-
-    def calculate_abs_pos(self, image, pos):
-        rect = self.rect.copy()
-        center = (100, 100)
-        if pos[0]-rect.left < self.rect.w/2:
-            if pos[1]-rect.top < self.rect.h/2:
-                rect.topleft = (100, 100)
-            else:
-                rect.bottomleft = center
-        else:
-            if pos[1]-rect.top < self.rect.h/2:
-                rect.topright = center
-            else:
-                rect.bottomright = center
-
-        image.blit(self.image, rect.topleft)
-
-    def calculate_bg_pos(self, rect, start_pos, end_pos):
-        coords = ((0, 0), (rect.w, rect.h))
-        if start_pos[0] > end_pos[0]:
-            if start_pos[1] < end_pos[1]:
-                coords = ((rect.w, 0), (0, rect.h))
-        if start_pos[0] < end_pos[0]:
-            if start_pos[1] > end_pos[1]:
-                coords = ((rect.w, 0), (0, rect.h))
-        if rect.h == self.line_width:
-            coords = ((0, rect.h/2), (rect.w, rect.h/2))
-        if rect.w == self.line_width:
-            coords = ((rect.w/2, 0), (rect.w/2, rect.h))
-        return coords
 
 
 class Particle(pygame.sprite.Sprite):

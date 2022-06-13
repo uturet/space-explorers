@@ -20,7 +20,7 @@ class Game:
                     running = False
                 self.state.event_manager.notify(event)
 
-            for tmp_sub in self.state.tmp_group:
+            for tmp_sub in self.state.tmp_event_group:
                 for event in events:
                     if hasattr(event, 'pos'):
                         event.pos = self.state.bg.abs_pos_to_bg(*event.pos)

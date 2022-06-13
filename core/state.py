@@ -17,11 +17,13 @@ class State:
     milliseconds = 0
     seconds = 0
     secounds_past = 0
-    mouse_intersected = set()
-    mouse_select = set()
-    tmp_group = set()
 
     def __init__(self):
+        self.mouse_intersected = set()
+        self.mouse_select = set()
+        self.tmp_event_group = set()
+        self.tmp_preview_group = set()
+
         # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen = pygame.display.set_mode((Config.width, Config.height))
         self.set_group_attachmet()
@@ -75,6 +77,11 @@ class State:
         self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
         self.grid.draw_grid(self.screen)
 
+        for spr in self.tmp_preview_group:
+            self.screen.blit(
+                spr.image, self.bg.bg_pos_to_abs(
+                    spr.rect.left, spr.rect.top))
+
         for spr in self.screengroup:
             self.screen.blit(
                 spr.image, self.bg.bg_pos_to_abs(
@@ -83,7 +90,8 @@ class State:
 
     def handle_mousemotion(self, state, event):
         self.mouse_intersected.clear()
-        self.tmp_group.clear()
+        self.tmp_event_group.clear()
+        self.tmp_preview_group.clear()
 
         ch.get_rect_intersect_sprites_by_pos(
             event.pos,
@@ -100,13 +108,13 @@ class State:
             self.hotbar not in self.mouse_intersected and
                 self.mouse.active_mod == self.mouse.INACTIVE):
             self.grid.pos_intersects(
-                self.bg.abs_pos_to_bg(*event.pos), self.tmp_group)
-            self.mouse_intersected.update(self.tmp_group)
+                self.bg.abs_pos_to_bg(*event.pos), self.tmp_event_group)
+            self.mouse_intersected.update(self.tmp_event_group)
 
     def handle_mousepreselect(self, state, event):
         self.mouse_select.clear()
-        for spr in self.gamegroup:
-            spr.deactivate()
+        # for spr in self.gamegroup:
+        #     spr.deactivate()
 
     def handle_mouseselect(self, state, event):
         prev_select = self.mouse_select.copy()
