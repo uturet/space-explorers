@@ -3,6 +3,7 @@ from core.config import Config
 import pygame
 from core.event import MOUSEPRESELECT, MOUSESELECT, MOUSEENDSELECT
 from core import collision_handler as ch
+from core.preview_manager import PreviewManager
 
 
 class Mouse(pygame.sprite.Sprite):
@@ -23,6 +24,7 @@ class Mouse(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.dimens = (Config.mouse_tracker_width, Config.mouse_tracker_height)
         self.image = pygame.Surface(self.dimens, pygame.SRCALPHA)
+        self.preview_manager = PreviewManager()
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
         self.bg_rect = self.rect.copy()
@@ -64,6 +66,7 @@ class Mouse(pygame.sprite.Sprite):
             self.image.fill((255, 255, 255, 0))
             self.rect.center = self.pos
             self.bg_rect.center = state.bg.abs_pos_to_bg(*event.pos)
+
             self.preview.rect.center = self.bg_rect.center
 
             self.intersections.clear()
@@ -75,7 +78,8 @@ class Mouse(pygame.sprite.Sprite):
                     valid = False
                     break
             if valid:
-                self.preview.handle_intersections(state, self.intersections)
+                # self.preview.handle_intersections(state, self.intersections)
+                self.preview_manager.set_connections(state, self.intersections)
             self.preview.update_preview_image(state, self.image, valid)
             self.image.blit(self.preview.image, self.center_point)
 

@@ -35,7 +35,8 @@ class State:
         self.bg = ui.Background()
         self.mouse = ui.Mouse()
         self.hotbar = ui.hotbar.Hotbar()
-        self.minimap = ui.Minimap()
+        # self.minimap = ui.Minimap()
+        self.minimap = None
 
         # pygame.time.set_timer(HIGLIGHT, 1000)
 

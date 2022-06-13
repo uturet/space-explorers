@@ -117,7 +117,7 @@ class Preview(ABC, ColorFrameList):
                     state.mouse.bg_rect.center, self.cover_radius,
                     spr.rect.center, spr.radius
             )):
-                connection = Connectoin(
+                connection = ConnectoinPreview(
                     state.mouse.bg_rect.center, spr)
                 self.connections[spr] = connection
                 for i in intersections:
@@ -163,6 +163,61 @@ class Connectoin(pygame.sprite.Sprite, ColorFrameList):
 
     def deactivate(self):
         self.select_frame(0)
+
+
+class ConnectoinPreview(pygame.sprite.Sprite, ColorFrameList):
+    groups = ()
+    line_width = 4
+
+    def __init__(self, start_pos, spr):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.connects = set()
+        rect = ch.rect_from_points(start_pos, spr.rect.center)
+        rect.h = max(self.line_width, rect.h)
+        rect.w = max(self.line_width, rect.w)
+
+        self.width = rect.w
+        self.height = rect.h
+        self.colors = (Config.orange_400)
+        self.coords = self.calculate_bg_pos(rect, start_pos, spr.rect.center)
+
+        self.create_frames(center=rect.center)
+        self.select_frame(0)
+
+    def draw_frame(self, image, color):
+        image.fill((255, 255, 255, 100))
+        pygame.draw.line(image, color,
+                         *self.coords, int(self.line_width))
+
+    def calculate_abs_pos(self, image, pos):
+        rect = self.rect.copy()
+        center = (100, 100)
+        if pos[0]-rect.left < self.rect.w/2:
+            if pos[1]-rect.top < self.rect.h/2:
+                rect.topleft = (100, 100)
+            else:
+                rect.bottomleft = center
+        else:
+            if pos[1]-rect.top < self.rect.h/2:
+                rect.topright = center
+            else:
+                rect.bottomright = center
+
+        image.blit(self.image, rect.topleft)
+
+    def calculate_bg_pos(self, rect, start_pos, end_pos):
+        coords = ((0, 0), (rect.w, rect.h))
+        if start_pos[0] > end_pos[0]:
+            if start_pos[1] < end_pos[1]:
+                coords = ((rect.w, 0), (0, rect.h))
+        if start_pos[0] < end_pos[0]:
+            if start_pos[1] > end_pos[1]:
+                coords = ((rect.w, 0), (0, rect.h))
+        if rect.h == self.line_width:
+            coords = ((0, rect.h/2), (rect.w, rect.h/2))
+        if rect.w == self.line_width:
+            coords = ((rect.w/2, 0), (rect.w/2, rect.h))
+        return coords
 
 
 class Particle(pygame.sprite.Sprite):
