@@ -21,7 +21,7 @@ class PreviewManager:
         self.width = 100
         self.colors = ()
         self.frames = {}  # {angle: {distance: ConnectionPreview}}
-        self.step = 3
+        self.step = 2
         self.covered = {}  # {angle: [distance, opp, spr, opp]}
         self.exclede_angles = {}  # {distance: [[angle, ...], [angle, ...]]}
         self.dis_anlge = {
@@ -92,12 +92,9 @@ class PreviewManager:
         converted = pygame.transform.rotate(converted, angle)
         return converted
 
-    # def draw(self, image):
-    #     for frame in self.images:
-    #         image.blit(frame.image, frame.rect.topleft)
-
     def set_connections(self, state, intersections):
         self.covered.clear()
+        self.exclede_angles.clear()
         for spr in intersections:
             self.save_sprite(state.mouse.rect.center, spr)
         state.tmp_preview_group.update(self.validate_by_mask())
@@ -129,45 +126,29 @@ class PreviewManager:
         y_cat = start_pos[1] - spr.rect.center[1]
         x_cat = start_pos[0] - spr.rect.center[0]
         hypot = math.hypot(x_cat, y_cat)
-        sign = ''
         if ((y_cat < 0 and x_cat < 0) or (y_cat > 0 and x_cat > 0)):
             angle = self.step * \
                 int(math.degrees(math.acos(abs(y_cat)/hypot))/(self.step))
-            sign = 'cos'
             angle = 90 + abs(angle)
             if y_cat <= 0:
                 angle = 180 + angle
         else:
             angle = self.step * \
                 int(math.degrees(math.asin(abs(y_cat)/hypot))/(self.step))
-            sign = 'sin'
             if y_cat < 0 or x_cat > 0:
                 angle = 180 + abs(angle)
         distance = 10 * int(hypot / 10)
         if distance > 100:
             return
-        cover_angles = [angle]
-        [cover_angles.append(a) for a in range(
-            angle-self.dis_anlge[distance], angle+self.dis_anlge[distance]+1)]
-        ca_set = set(cover_angles)
-        rm_ex = None
-        for ex_dis, points in self.exclede_angles.items():
-            for i, angles in enumerate(points):
-                if angle in angles:
-                    if ex_dis < distance:
-                        return
-                    else:
-                        rm_ex = (ex_dis, i)
-                        del self.covered[angles[0]]
-                if (ex_dis > distance and ca_set.intersection(angles)):
-                    rm_ex = (ex_dis, i)
-                    del self.covered[angles[0]]
-        if rm_ex:
-            del self.exclede_angles[rm_ex[0]][rm_ex[1]]
-
-        self.covered[angle] = [
-            distance, spr, self.get_connection(angle, distance, start_pos)
-        ]
+        if angle in self.covered:
+            if self.covered[angle][0] > distance:
+                self.covered[angle] = [
+                    distance, spr, self.get_connection(
+                        angle, distance, start_pos)]
+        else:
+            self.covered[angle] = [
+                distance, spr, self.get_connection(angle, distance, start_pos)
+            ]
 
     def validate_by_mask(self):
         connectoins = set()
@@ -180,9 +161,19 @@ class PreviewManager:
             for angle_2, data_2 in self.covered.items():
                 if angle_1 == angle_2 or data_1[2] in invalid:
                     continue
-                if (angle_1-45 < angle_2 > angle_1+45):
-                    if not pygame.sprite.collide_mask(data_1[1], data_2[2]):
+                left = angle_1-45
+                if left < 0:
+                    left += 360
+                right = angle_1+45
+                if right > 360:
+                    right -= 360
+                if (left < angle_2 or angle_2 < right):
+                    con = pygame.sprite.collide_mask(data_1[1], data_2[2])
+                    if not con:
                         connectoins.add(data_2[2])
                     else:
                         invalid.add(data_2[2])
-        return connectoins
+                        connectoins.add(data_1[2])
+                else:
+                    connectoins.add(data_2[2])
+        return connectoins - invalid
