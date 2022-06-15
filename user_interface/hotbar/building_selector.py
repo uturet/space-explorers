@@ -92,14 +92,19 @@ class SelectorOption(Node):
         pass
 
     def handle_mousemotion(self, state, event):
+        if state.hotbar.active_mod_index != Hotbar.SELECTMOD:
+            return
+
         if (state.hotbar in state.mouse_intersected and
-            state.hotbar.active_mod_index == Hotbar.SELECTMOD and
                 self in state.mouse_intersected):
             self.is_hover = True
             self.paintbar()
         elif self.is_hover:
             self.is_hover = False
             self.paintbar()
+        if (self.is_active and (state.hotbar not in state.mouse_intersected or
+                                state.minimap not in state.mouse_intersected)):
+            self.preview.handle_mousemotion(state, event)
 
     def handle_mousebuttonup(self, state, event):
         if state.hotbar.active_mod_index != Hotbar.SELECTMOD:
@@ -115,9 +120,7 @@ class SelectorOption(Node):
                     state.minimap not in state.mouse_intersected and
                     state.hotbar not in state.mouse_intersected and
                     self.preview.valid):
-                state.add_gameobj(self.preview.building(
-                    self.preview.connections.copy(),
-                    state.mouse.bg_rect.center))
+                state.create_selected_building(self.preview)
 
         if event.button == 3:
             if (self.is_active and
@@ -126,10 +129,11 @@ class SelectorOption(Node):
 
     def activate(self, state):
         self.is_active = True
-        state.mouse.set_preview(self.preview)
+        state.mouse.set_mod(state.mouse.PREVIEW)
         self.paintbar()
 
     def deactivate(self, state):
         self.is_active = False
-        state.mouse.clear_preview()
+        state.mouse.set_mod(state.mouse.INACTIVE)
+        state.tmp_preview_group.clear()
         self.paintbar()

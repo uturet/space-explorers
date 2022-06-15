@@ -11,6 +11,7 @@ from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
 from game_objects.buildings import building_previews, TransmitterPreview, GeneratorPreview
 from core.path_manager import PathManager
 import random
+from core.connection_manager import ConnectionManager
 
 
 class State:
@@ -22,7 +23,7 @@ class State:
         self.mouse_intersected = set()
         self.mouse_select = set()
         self.tmp_event_group = set()
-        self.tmp_preview_group = set()
+        self.tmp_preview_group = {}
 
         # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen = pygame.display.set_mode((Config.width, Config.height))
@@ -31,14 +32,16 @@ class State:
         self.event_manager = EventManager(self)
         self.grid = Grid()
         self.path_manager = PathManager()
+        self.connection_manager = ConnectionManager()
 
         self.bg = ui.Background()
         self.mouse = ui.Mouse()
         self.hotbar = ui.hotbar.Hotbar()
-        # self.minimap = ui.Minimap()
-        self.minimap = None
+        self.minimap = ui.Minimap()
 
         # pygame.time.set_timer(HIGLIGHT, 1000)
+
+        seed_buildings_rand(500, self, self.screen.get_rect())
 
         self.event_manager.add_group(
             self,
@@ -78,7 +81,7 @@ class State:
         self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
         self.grid.draw_grid(self.screen)
 
-        for spr in self.tmp_preview_group:
+        for spr in self.tmp_preview_group.values():
             self.screen.blit(
                 spr.image, self.bg.bg_pos_to_abs(
                     spr.rect.left, spr.rect.top))
@@ -173,6 +176,17 @@ class State:
         building_previews['Generator'] = GeneratorPreview()
 
     def add_gameobj(self, obj):
+        self.tmp_preview_group.clear()
         self.grid.add_item(obj)
         if isinstance(obj, Building):
             self.path_manager.add_building(obj)
+
+    def create_selected_building(self, preview):
+        new_building = preview.building(self.mouse.bg_rect.center)
+        for building, con_prev in self.tmp_preview_group.items():
+            new_building.add_connection(
+                building,
+                con_prev.create_connection(
+                    self, new_building, building
+                ))
+        self.add_gameobj(new_building)

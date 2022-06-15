@@ -10,6 +10,9 @@ class Config(MaterialColors):
     hotbarwidth = 500
     hotbarheight = 130
 
+    preview_cover_size = 200
+    preview_cover_radius = 100
+
     mouse_tracker_width = 100
     mouse_tracker_height = 100
 

@@ -1,88 +1,83 @@
 import pygame
 from core.config import Config
-from collections import namedtuple
 import math
 
 
 class ConnectionPreview(pygame.sprite.Sprite):
     groups = ()
 
-    def __init__(self, image, rect, mask):
+    def __init__(self, angle, distance, image, rect, mask):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = image
         self.rect = rect
         self.mask = mask
+        self.angle = angle
+        self.distance = distance
+
+    def create_connection(self, state, con_from, con_to):
+        frames = []
+        for color in Connection.colors:
+            f = state.connection_manager.create_frame(
+                self.distance, self.angle, color
+            )
+            frames.append(f)
+
+        return Connection(con_from, con_to, frames)
 
 
-class PreviewManager:
+class ConnectionManager:
+    cover_size = Config.preview_cover_size
+    cover_radius = Config.preview_cover_radius
 
     def __init__(self):
         self.height = 4
-        self.width = 100
-        self.colors = ()
+        self.width = self.cover_radius
+        self.color = Config.grey_500
         self.frames = {}  # {angle: {distance: ConnectionPreview}}
         self.step = 2
         self.covered = {}  # {angle: [distance, opp, spr, opp]}
-        self.exclede_angles = {}  # {distance: [[angle, ...], [angle, ...]]}
-        self.dis_anlge = {
-            10: round(45/self.step),
-            20: round(27/self.step),
-            30: round(19/self.step),
-            40: round(14/self.step),
-            50: round(12/self.step),
-            60: round(10/self.step),
-            70: round(8/self.step),
-            80: round(7/self.step),
-            90: round(6/self.step),
-            100: round(6/self.step),
-        }
+        for i in range(10):
+            self.create_frames(self.width-(i*10), self.color)
 
-        colors = (
-            Config.orange_500,
-            Config.red_500,
-            Config.green_500,
-            Config.indigo_500,
-            Config.teal_500,
-            Config.orange_500,
-            Config.red_500,
-            Config.green_500,
-            Config.indigo_500,
-            Config.teal_500,
-        )
-        for i, color in enumerate(colors):
-            self.create_frames(self.width-(i*10), color)
-
-    def create_frames(self, width, color):
+    def create_frames(self, distance, color):
         for angle in range(0, 360, self.step):
             if angle not in self.frames:
                 self.frames[angle] = {}
-            converted = self.create_frame(width, angle, color)
-            rect = converted.get_rect()
-            if angle == 0:
-                rect.topleft = (self.width, self.width)
-                rect.top -= self.height/2
-            elif angle < 90:
-                rect.bottomleft = (self.width, self.width)
-            elif angle == 90:
-                rect.bottomleft = (self.width, self.width)
-                rect.left -= self.height/2
-            elif angle < 180:
-                rect.bottomright = (self.width, self.width)
-            elif angle == 180:
-                rect.bottomright = (self.width, self.width)
-                rect.top += self.height/2
-            elif angle < 270:
-                rect.topright = (self.width, self.width)
-            elif angle == 270:
-                rect.topright = (self.width, self.width)
-                rect.right += self.height/2
-            else:
-                rect.topleft = (self.width, self.width)
+            image, rect, mask = self.create_frame(distance, angle, color)
             con = ConnectionPreview(
-                converted, rect, pygame.mask.from_surface(converted))
-            self.frames[angle][width] = con
+                angle, distance, image, rect, mask)
+            self.frames[angle][distance] = con
 
-    def create_frame(self, width, angle, color):
+    def create_frame(self, distance, angle, color):
+        image = self.create_image(distance, angle, color)
+        rect = image.get_rect()
+        self.set_default_pos(angle, rect, (self.width, self.width))
+        mask = pygame.mask.from_surface(image)
+        return image, rect, mask
+
+    def set_default_pos(self, angle, rect, pos):
+        if angle == 0:
+            rect.topleft = pos
+            rect.top -= self.height/2
+        elif angle < 90:
+            rect.bottomleft = pos
+        elif angle == 90:
+            rect.bottomleft = pos
+            rect.left -= self.height/2
+        elif angle < 180:
+            rect.bottomright = pos
+        elif angle == 180:
+            rect.bottomright = pos
+            rect.top += self.height/2
+        elif angle < 270:
+            rect.topright = pos
+        elif angle == 270:
+            rect.topright = pos
+            rect.right += self.height/2
+        else:
+            rect.topleft = pos
+
+    def create_image(self, width, angle, color):
         image = pygame.Surface(
             (width, self.height), pygame.SRCALPHA)
         rect = image.get_rect()
@@ -94,10 +89,9 @@ class PreviewManager:
 
     def set_connections(self, state, intersections):
         self.covered.clear()
-        self.exclede_angles.clear()
         for spr in intersections:
-            self.save_sprite(state.mouse.rect.center, spr)
-        state.tmp_preview_group.update(self.validate_by_mask())
+            self.save_point(state.mouse.bg_rect.center, spr)
+        self.validate_by_mask(state.tmp_preview_group)
 
     def get_connection(self, angle, distance, pos):
         if angle == 0:
@@ -122,7 +116,7 @@ class PreviewManager:
             self.frames[angle][distance].rect.topleft = pos
         return self.frames[angle][distance]
 
-    def save_sprite(self, start_pos, spr):
+    def save_point(self, start_pos, spr):
         y_cat = start_pos[1] - spr.rect.center[1]
         x_cat = start_pos[0] - spr.rect.center[0]
         hypot = math.hypot(x_cat, y_cat)
@@ -140,6 +134,8 @@ class PreviewManager:
         distance = 10 * int(hypot / 10)
         if distance > 100:
             return
+        if distance == 0:
+            return
         if angle in self.covered:
             if self.covered[angle][0] > distance:
                 self.covered[angle] = [
@@ -150,16 +146,17 @@ class PreviewManager:
                 distance, spr, self.get_connection(angle, distance, start_pos)
             ]
 
-    def validate_by_mask(self):
-        connectoins = set()
+    def validate_by_mask(self, building_con):
+        connectoins = {}
         invalid = set()
 
         if len(self.covered) == 1:
-            return [list(self.covered.values())[0][2]]
+            point = list(self.covered.values())[0]
+            building_con[point[1]] = point[2]
 
         for angle_1, data_1 in self.covered.items():
             for angle_2, data_2 in self.covered.items():
-                if angle_1 == angle_2 or data_1[2] in invalid:
+                if angle_1 == angle_2 or data_1[1] in invalid:
                     continue
                 left = angle_1-45
                 if left < 0:
@@ -170,10 +167,33 @@ class PreviewManager:
                 if (left < angle_2 or angle_2 < right):
                     con = pygame.sprite.collide_mask(data_1[1], data_2[2])
                     if not con:
-                        connectoins.add(data_2[2])
+                        connectoins[data_2[1]] = data_2[2]
                     else:
-                        invalid.add(data_2[2])
-                        connectoins.add(data_1[2])
+                        invalid.add(data_2[1])
+                        connectoins[data_1[1]] = data_1[2]
                 else:
-                    connectoins.add(data_2[2])
-        return connectoins - invalid
+                    connectoins[data_2[1]] = data_2[2]
+        for spr in connectoins.keys() - invalid:
+            building_con[spr] = connectoins[spr]
+
+
+class Connection(pygame.sprite.Sprite):
+    groups = ()
+    colors = (Config.indigo_500, Config.orange_500)
+    connects = None
+
+    def __init__(self, start_spr, end_spr, frames):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.connects = {start_spr, end_spr}
+        self.frames = frames
+
+    def select_frame(self, index):
+        self.iamge = self.frames[index][0]
+        self.rect = self.frames[index][1]
+        self.mask = self.frames[index][2]
+
+    def activate(self):
+        self.select_frame(1)
+
+    def deactivate(self):
+        self.select_frame(0)
