@@ -56,7 +56,7 @@ class State:
         self.secounds_past += self.seconds
 
         for spr in self.gamegroup:
-            spr.deactivate()
+            spr.set_status(Building.INACTIVE)
 
         for consumer, producers in self.path_manager.producers.items():
             if not len(producers):
@@ -116,24 +116,18 @@ class State:
             self.mouse_intersected.update(self.tmp_event_group)
 
     def handle_mousepreselect(self, state, event):
-        self.mouse_select.clear()
-        # for spr in self.gamegroup:
-        #     spr.deactivate()
+        while self.mouse_select:
+            spr = self.mouse_select.pop()
+            spr.set_status(Building.INACTIVE)
 
     def handle_mouseselect(self, state, event):
-        prev_select = self.mouse_select.copy()
-        self.mouse_select.clear()
-        self.grid.rect_intersects(event.rect, self.mouse_select)
-
-        for spr in (prev_select - self.mouse_select):
-            spr.is_hover = False
-        for spr in self.mouse_select:
-            spr.is_hover = True
+        pass
 
     def handle_mouseendselect(self, state, event):
+
+        self.grid.rect_intersects(event.rect, self.mouse_select)
         for spr in self.mouse_select:
-            spr.is_hover = False
-            spr.is_active = True
+            spr.set_status(Building.SELECTED)
         if len(self.mouse_select) > 1:
             pygame.event.post(
                 pygame.event.Event(

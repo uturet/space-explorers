@@ -51,15 +51,11 @@ class Mouse(pygame.sprite.Sprite):
             self.bg_rect.center = state.bg.abs_pos_to_bg(*event.pos)
         elif self.active_mod == self.SELECT:
             self.image.fill((255, 255, 255, 0))
-            bg_rect = ch.rect_from_points(
-                self.select_point, state.bg.abs_pos_to_bg(*event.pos))
             abs_rect = ch.rect_from_points(
                 state.bg.bg_pos_to_abs(*self.select_point), event.pos)
             pygame.draw.rect(
                 self.image, Config.yellow_500,
                 abs_rect, 2)
-            pygame.event.post(pygame.event.Event(
-                MOUSESELECT, {'rect': bg_rect}))
 
     def handle_mousebuttondown(self, state, event):
         if event.button != 1:
@@ -67,7 +63,7 @@ class Mouse(pygame.sprite.Sprite):
         if self.active_mod == self.INACTIVE and \
             state.minimap not in state.mouse_intersected and \
                 state.hotbar not in state.mouse_intersected:
-            self.active_mod = self.SELECT
+            self.set_mod(self.SELECT)
             self.select_point = state.bg.abs_pos_to_bg(
                 event.pos[0], event.pos[1])
             pygame.event.post(pygame.event.Event(MOUSEPRESELECT))
@@ -76,6 +72,9 @@ class Mouse(pygame.sprite.Sprite):
         if event.button != 1:
             return
         if self.active_mod == self.SELECT:
-            self.active_mod = self.INACTIVE
+            self.set_mod(self.INACTIVE)
             self.image.fill((255, 255, 255, 0))
-            pygame.event.post(pygame.event.Event(MOUSEENDSELECT))
+            bg_rect = ch.rect_from_points(
+                self.select_point, state.bg.abs_pos_to_bg(*event.pos))
+            pygame.event.post(pygame.event.Event(
+                MOUSEENDSELECT, {'rect': bg_rect}))

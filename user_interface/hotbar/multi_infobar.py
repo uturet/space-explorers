@@ -1,3 +1,4 @@
+from game_objects.object_type import Building
 from user_interface.hotbar import HotbarMod, ControlBar
 from user_interface import Node
 from game_objects.buildings import building_previews
@@ -20,7 +21,7 @@ class MultiInfoBar(HotbarMod):
 
     def set_info_providers(self, sprites):
         self.info_providers = sprites
-        [spr.activate() for spr in sprites]
+        [spr.set_status(Building.SELECTED) for spr in sprites]
         for p in self._previews:
             p.kill()
         self._previews.clear()

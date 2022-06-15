@@ -1,3 +1,4 @@
+from game_objects.object_type import Building
 from user_interface.hotbar import HotbarMod, ControlBar
 from user_interface import Node
 from game_objects.buildings import building_previews
@@ -13,7 +14,7 @@ class InfoBar(HotbarMod):
 
     def set_info_provider(self, sprite):
         self.control_bar.info_provider = sprite
-        sprite.activate()
+        sprite.set_status(Building.SELECTED)
         building_previews[sprite.__class__.__name__].draw_option_image(
             self.infobar_preview.rect, self.infobar_preview.image)
         self.image.blit(self.infobar_preview.image, self.infobar_preview.rect)

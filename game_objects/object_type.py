@@ -30,10 +30,10 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
     def status(self):
         return self._status
 
-    @status.setter
-    def status(self, i):
-        if i in (self.INACTIVE, self.HOVERED, self.SELECTED):
-            self._status = i
+    def set_status(self, index):
+        if index in (self.INACTIVE, self.HOVERED, self.SELECTED):
+            self._status = index
+            self.select_frame(index)
         else:
             raise Exception(
                 f'Invalid {self.__class__.__name___}.status. Should be one of {(self.INACTIVE, self.HOVERED, self.SELECTED)}, given {i}')
