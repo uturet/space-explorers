@@ -2,6 +2,9 @@ from core import collision_handler as ch
 from core.config import Config
 import pygame
 import math
+from core.connection_manager import Connection
+
+from game_objects.object_type import Building, Particle
 
 
 class Grid:
@@ -23,7 +26,6 @@ class Grid:
             self._chunk(item.rect.bottomright)
         }
         for i in chunk_indexes:
-            # TODO notify intersected
             self.__grid[i].add(item)
 
     def remove_item(self, item):
@@ -34,7 +36,6 @@ class Grid:
             self._chunk(item.rect.bottomright)
         }
         for i in chunk_indexes:
-            # TODO notify intersected
             self.__grid[i].remove(item)
 
     def move_item(self, item, new_pos):
@@ -53,18 +54,16 @@ class Grid:
         }
 
         for i in (prev_chunk_indexes - new_chunk_indexes):
-            # TODO notify intersected
             self.__grid[i].remove(item)
 
         for i in (new_chunk_indexes - prev_chunk_indexes):
-            # TODO notify intersected
             self.__grid[i].add(item)
 
     def pos_intersects(self, pos, group):
         ch.get_rect_intersect_sprites_by_pos(
             pos, self.__grid[self._chunk(pos)], group)
 
-    def rect_intersects(self, rect, group):
+    def rect_intersects(self, rect, buildgroup, congroup=None, partgroup=None):
         left = math.ceil(max(0, rect.left) / Config.chunk_size)
         right = min(self._xlen+1,
                     max(0, math.ceil((rect.right / Config.chunk_size)+1)))
@@ -76,7 +75,12 @@ class Grid:
             for y in range(top, bottom):
                 for item in self.__grid[f'{x}{y}']:
                     if rect.colliderect(item.rect):
-                        group.add(item)
+                        if isinstance(item, Building):
+                            buildgroup.add(item)
+                        elif (isinstance(congroup, set) and isinstance(item, Connection)):
+                            congroup.add(item)
+                        elif (isinstance(partgroup, set) and isinstance(item, Particle)):
+                            partgroup.add(item)
 
     def _chunk(self, pos):
         x = max(0, min(self._xlen, math.ceil(

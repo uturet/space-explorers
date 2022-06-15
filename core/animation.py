@@ -1,7 +1,7 @@
 from collections import namedtuple
 import pygame
 
-Frame = namedtuple('Frame', 'image mask')
+Frame = namedtuple('Frame', 'image rect mask')
 
 
 class ColorFrameList:
@@ -13,6 +13,7 @@ class ColorFrameList:
 
     def select_frame(self, i, attr='frames'):
         self.image = getattr(self, attr)[i].image
+        self.rect = getattr(self, attr)[i].rect
         self.mask = getattr(self, attr)[i].mask
 
     def create_frames(self, attr='frames', center=None):
@@ -26,7 +27,7 @@ class ColorFrameList:
             self.draw_frame(image, color)
             converted = image.convert_alpha()
             getattr(self, attr).append(
-                Frame(converted, pygame.mask.from_surface(converted)))
+                Frame(converted, self.rect, pygame.mask.from_surface(converted)))
 
     def draw_frame(self, image, color):
         raise NotImplementedError()

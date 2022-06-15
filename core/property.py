@@ -37,7 +37,7 @@ class EnergyInteraction:
     LATENT = 0
     CONSUMER = 1
     PRODUCER = 2
-    _ei_type = LATENT
+    _ei_type = CONSUMER
 
     @property
     def ei_type(self):

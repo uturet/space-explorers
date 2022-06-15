@@ -14,7 +14,7 @@ class InfoBar(HotbarMod):
 
     def set_info_provider(self, sprite):
         self.control_bar.info_provider = sprite
-        sprite.set_status(Building.SELECTED)
+        sprite.set_ui_type(Building.SELECTED)
         building_previews[sprite.__class__.__name__].draw_option_image(
             self.infobar_preview.rect, self.infobar_preview.image)
         self.image.blit(self.infobar_preview.image, self.infobar_preview.rect)

@@ -1,8 +1,9 @@
 import random
+from game_objects.object_type import Building
 from game_objects.player import Player
 import pygame
 from core.config import Config
-from game_objects.buildings import Transmitter
+from game_objects.buildings import Transmitter, Generator
 
 
 def seed_players_rand(count, state):
@@ -33,8 +34,9 @@ def fill_players(size, state):
 
 def seed_buildings_rand(count, state, rect):
     for i in range(count):
-        t = Transmitter((
+        b = Generator((
             random.randint(rect[0], rect[0] + rect[2]),
             random.randint(rect[1], rect[1] + rect[3])
         ))
-        state.grid.add_item(t)
+        b.set_type(Building.ACTIVE)
+        state.grid.add_item(b)

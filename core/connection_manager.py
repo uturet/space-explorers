@@ -1,6 +1,7 @@
 import pygame
 from core.config import Config
 import math
+from core.animation import Frame
 
 
 class ConnectionPreview(pygame.sprite.Sprite):
@@ -17,9 +18,9 @@ class ConnectionPreview(pygame.sprite.Sprite):
     def create_connection(self, state, con_from, con_to):
         frames = []
         for color in Connection.colors:
-            f = state.connection_manager.create_frame(
-                self.distance, self.angle, color
-            )
+            f = Frame(*state.connection_manager.create_frame(
+                self.distance, self.angle, color, con_from.rect.center
+            ))
             frames.append(f)
 
         return Connection(con_from, con_to, frames)
@@ -32,7 +33,7 @@ class ConnectionManager:
     def __init__(self):
         self.height = 4
         self.width = self.cover_radius
-        self.color = Config.grey_500
+        self.color = Config.bluegrey_200
         self.frames = {}  # {angle: {distance: ConnectionPreview}}
         self.step = 2
         self.covered = {}  # {angle: [distance, opp, spr, opp]}
@@ -48,10 +49,12 @@ class ConnectionManager:
                 angle, distance, image, rect, mask)
             self.frames[angle][distance] = con
 
-    def create_frame(self, distance, angle, color):
+    def create_frame(self, distance, angle, color, pos=None):
         image = self.create_image(distance, angle, color)
         rect = image.get_rect()
-        self.set_default_pos(angle, rect, (self.width, self.width))
+        if not pos:
+            pos = (self.width, self.width)
+        self.set_default_pos(angle, rect, pos)
         mask = pygame.mask.from_surface(image)
         return image, rect, mask
 
@@ -179,18 +182,19 @@ class ConnectionManager:
 
 class Connection(pygame.sprite.Sprite):
     groups = ()
-    colors = (Config.indigo_500, Config.orange_500)
+    colors = (Config.lightblue_500, Config.orange_500)
     connects = None
 
     def __init__(self, start_spr, end_spr, frames):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.connects = {start_spr, end_spr}
         self.frames = frames
+        self.select_frame(0)
 
     def select_frame(self, index):
-        self.iamge = self.frames[index][0]
-        self.rect = self.frames[index][1]
-        self.mask = self.frames[index][2]
+        self.image = self.frames[index].image
+        self.rect = self.frames[index].rect
+        self.mask = self.frames[index].mask
 
     def activate(self):
         self.select_frame(1)

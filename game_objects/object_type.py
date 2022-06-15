@@ -4,7 +4,7 @@ from core.config import Config
 from core import collision_handler as ch
 from core.property import EnergyInteraction
 from core.event import HOTBARINFOMOD
-from core.animation import ColorFrameList
+from core.animation import ColorFrameList, Frame
 
 
 class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
@@ -12,38 +12,74 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
     INACTIVE = 0
     HOVERED = 1
     SELECTED = 2
+    _ui_type = INACTIVE
 
-    _status = INACTIVE
+    PLAN = 0
+    ACTIVE = 1
+    _type = PLAN
 
-    hover_color = Config.blue_200
-    active_color = Config.green_200
+    hover_color = Config.yellow_400
+    active_color = Config.green_400
 
     def __init__(self, pos):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.building_con = {}
+        self.frameset = []
+        self.colors = (Config.bluegrey_400, self.color)
+        self.create_frame_set(pos)
+        self.select_frame()
 
-        self.colors = (self.color, self.hover_color, self.active_color)
-        self.create_frames(center=pos)
-        self.select_frame(0)
+    def create_frame_set(self, pos):
+        for color in self.colors:
+            frames = []
+            image = pygame.Surface(
+                (self.width, self.height), pygame.SRCALPHA)
+            self.draw_frame(image, color)
+            self.add_frame(image, pos, frames)
+
+            image = pygame.Surface(
+                (self.width, self.height), pygame.SRCALPHA)
+            self.draw_frame(image, color)
+            pygame.draw.circle(image, self.hover_color,
+                               (self.width/2, self.height/2), self.radius, 2)
+            self.add_frame(image, pos, frames)
+
+            image = pygame.Surface(
+                (self.width, self.height), pygame.SRCALPHA)
+            self.draw_frame(image, color)
+            pygame.draw.circle(image, self.active_color,
+                               (self.width/2, self.height/2), self.radius, 2)
+            self.add_frame(image, pos, frames)
+
+            self.frameset.append(frames)
+
+    def add_frame(self, image, pos, frames):
+        rect = image.get_rect()
+        rect.center = pos
+        converted = image.convert_alpha()
+        frames.append(
+            Frame(converted, rect, pygame.mask.from_surface(converted)))
+
+    def select_frame(self):
+        self.image = self.frameset[self.type][self.ui_type].image
+        self.rect = self.frameset[self.type][self.ui_type].rect
+        self.mask = self.frameset[self.type][self.ui_type].mask
 
     @property
-    def status(self):
-        return self._status
+    def ui_type(self):
+        return self._ui_type
 
-    def set_status(self, index):
-        if index in (self.INACTIVE, self.HOVERED, self.SELECTED):
-            self._status = index
-            self.select_frame(index)
-        else:
-            raise Exception(
-                f'Invalid {self.__class__.__name___}.status. Should be one of {(self.INACTIVE, self.HOVERED, self.SELECTED)}, given {i}')
+    def set_ui_type(self, index):
+        self._ui_type = index
+        self.select_frame()
 
-    def handle_mousebuttonup(self, state, event):
-        if (self in state.mouse_intersected
-                and self._status != self.SELECTED):
-            self._status = self.SELECTED
-            pygame.event.post(pygame.event.Event(
-                HOTBARINFOMOD, {'sprite': self}))
+    @property
+    def type(self):
+        return self._type
+
+    def set_type(self, index):
+        self._type = index
+        self.select_frame()
 
     def add_connection(self, building, con):
         self.building_con[building] = con

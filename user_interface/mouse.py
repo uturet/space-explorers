@@ -76,5 +76,9 @@ class Mouse(pygame.sprite.Sprite):
             self.image.fill((255, 255, 255, 0))
             bg_rect = ch.rect_from_points(
                 self.select_point, state.bg.abs_pos_to_bg(*event.pos))
+            if bg_rect.width == 0 and bg_rect.height == 0:
+                bg_rect.width = 4
+                bg_rect.height = 4
+                bg_rect.center = state.bg.abs_pos_to_bg(*event.pos)
             pygame.event.post(pygame.event.Event(
                 MOUSEENDSELECT, {'rect': bg_rect}))

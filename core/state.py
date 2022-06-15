@@ -24,6 +24,9 @@ class State:
         self.mouse_select = set()
         self.tmp_event_group = set()
         self.tmp_preview_group = {}
+        self.buildgroup = set()
+        self.congroup = set()
+        self.partgroup = set()
 
         # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen = pygame.display.set_mode((Config.width, Config.height))
@@ -41,7 +44,7 @@ class State:
 
         # pygame.time.set_timer(HIGLIGHT, 1000)
 
-        seed_buildings_rand(500, self, self.screen.get_rect())
+        seed_buildings_rand(1, self, self.screen.get_rect())
 
         self.event_manager.add_group(
             self,
@@ -56,7 +59,7 @@ class State:
         self.secounds_past += self.seconds
 
         for spr in self.gamegroup:
-            spr.set_status(Building.INACTIVE)
+            spr.set_ui_type(Building.INACTIVE)
 
         for consumer, producers in self.path_manager.producers.items():
             if not len(producers):
@@ -73,23 +76,35 @@ class State:
                         except Exception:
                             pass
 
+    def draw_group(self, group):
+        while group:
+            spr = group.pop()
+            self.screen.blit(
+                spr.image, self.bg.bg_pos_to_abs(
+                    spr.rect.left, spr.rect.top))
+
     def update(self):
         self.screen.fill(Config.bg)
         self.allgroup.update(self)
 
-        self.screengroup.clear()
-        self.grid.rect_intersects(self.bg.abs_rect, self.screengroup)
+        self.grid.rect_intersects(
+            self.bg.abs_rect,
+            self.buildgroup,
+            self.congroup,
+            self.partgroup,
+        )
         self.grid.draw_grid(self.screen)
+
+        self.draw_group(self.congroup)
 
         for spr in self.tmp_preview_group.values():
             self.screen.blit(
                 spr.image, self.bg.bg_pos_to_abs(
                     spr.rect.left, spr.rect.top))
 
-        for spr in self.screengroup:
-            self.screen.blit(
-                spr.image, self.bg.bg_pos_to_abs(
-                    spr.rect.left, spr.rect.top))
+        self.draw_group(self.buildgroup)
+        self.draw_group(self.partgroup)
+
         self.uigroup.draw(self.screen)
 
     def handle_mousemotion(self, state, event):
@@ -118,7 +133,7 @@ class State:
     def handle_mousepreselect(self, state, event):
         while self.mouse_select:
             spr = self.mouse_select.pop()
-            spr.set_status(Building.INACTIVE)
+            spr.set_ui_type(Building.INACTIVE)
 
     def handle_mouseselect(self, state, event):
         pass
@@ -127,7 +142,7 @@ class State:
 
         self.grid.rect_intersects(event.rect, self.mouse_select)
         for spr in self.mouse_select:
-            spr.set_status(Building.SELECTED)
+            spr.set_ui_type(Building.SELECTED)
         if len(self.mouse_select) > 1:
             pygame.event.post(
                 pygame.event.Event(
@@ -144,7 +159,6 @@ class State:
             self.hotbar.set_active_mod(self.hotbar.DEFAULT_MOD)
 
     def set_group_attachmet(self):
-        self.screengroup = set()
         self.allgroup = pygame.sprite.Group()
         self.uigroup = pygame.sprite.LayeredUpdates()
         self.interactable_group = pygame.sprite.Group()
@@ -170,7 +184,6 @@ class State:
         building_previews['Generator'] = GeneratorPreview()
 
     def add_gameobj(self, obj):
-        self.tmp_preview_group.clear()
         self.grid.add_item(obj)
         if isinstance(obj, Building):
             self.path_manager.add_building(obj)
@@ -178,9 +191,10 @@ class State:
     def create_selected_building(self, preview):
         new_building = preview.building(self.mouse.bg_rect.center)
         for building, con_prev in self.tmp_preview_group.items():
-            new_building.add_connection(
-                building,
-                con_prev.create_connection(
-                    self, new_building, building
-                ))
+            con = con_prev.create_connection(self, new_building, building)
+            new_building.add_connection(building, con)
+            building.add_connection(new_building, con)
+            if building.type == Building.ACTIVE:
+                self.add_gameobj(con)
         self.add_gameobj(new_building)
+        self.tmp_preview_group.clear()

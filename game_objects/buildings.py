@@ -1,6 +1,7 @@
 import pygame
 from game_objects.object_type import Building, Preview
 from core.config import Config
+from core.property import EnergyInteraction
 
 
 class Transmitter(Building):
@@ -32,7 +33,6 @@ class TransmitterPreview(Preview):
 
 
 class Generator(Building):
-    type = Building.PRODUCER
 
     width = 40
     height = width
