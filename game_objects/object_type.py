@@ -47,8 +47,6 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
         state.path_manager.remove_consumer(self)
         state.path_manager.add_building(self)
         self.select_frame()
-        for con in self.building_con.values():
-            state.grid.add_item(con)
 
     def create_frame_set(self, pos):
         for color in self.colors:
@@ -128,6 +126,7 @@ class Preview(ABC, ColorFrameList):
 
     def __init__(self):
         self.intersections = set()
+        self.con_intersections = set()
         self.width = self.building.width
         self.height = self.building.height
         self.radius = self.building.radius
@@ -154,10 +153,16 @@ class Preview(ABC, ColorFrameList):
     def handle_mousemotion(self, state, event):
         self.rect.center = state.mouse.bg_rect.center
         self.intersections.clear()
-        state.grid.rect_intersects(state.mouse.bg_rect, self.intersections)
+        self.con_intersections.clear()
+        state.grid.rect_intersects(
+            state.mouse.bg_rect, self.intersections, self.con_intersections)
 
         self.valid = True
         for spr in self.intersections:
+            if pygame.sprite.collide_mask(spr, self):
+                self.valid = False
+                break
+        for spr in self.con_intersections:
             if pygame.sprite.collide_mask(spr, self):
                 self.valid = False
                 break

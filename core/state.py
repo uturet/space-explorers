@@ -10,8 +10,9 @@ from seeder import seed_buildings_rand
 from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
 from game_objects.buildings import building_previews, TransmitterPreview, GeneratorPreview
 from core.path_manager import PathManager
-import random
 from core.connection_manager import ConnectionManager
+from user_interface import InfoManager
+from core.property import Battery
 
 
 class State:
@@ -36,6 +37,7 @@ class State:
         self.grid = Grid()
         self.path_manager = PathManager()
         self.connection_manager = ConnectionManager()
+        self.info_manager = InfoManager()
 
         self.bg = ui.Background()
         self.mouse = ui.Mouse()
@@ -63,9 +65,19 @@ class State:
     def draw_group(self, group):
         while group:
             spr = group.pop()
-            self.screen.blit(
-                spr.image, self.bg.bg_pos_to_abs(
-                    spr.rect.left, spr.rect.top))
+            pos = self.bg.bg_pos_to_abs(
+                spr.rect.left, spr.rect.top)
+            self.screen.blit(spr.image, pos)
+            if isinstance(spr, Building):
+                cur_point = int((spr.health_point / spr.health) * 10)
+                hpos = (pos[0]+spr.rect.width/2-10, pos[1]-10)
+                self.screen.blit(
+                    self.info_manager.h_frames[cur_point], hpos)
+                if isinstance(spr, Battery):
+                    cur_point = int((spr.charge / spr.capacity) * 10)
+                    epos = (pos[0]+spr.rect.width/2-10, pos[1]-14)
+                    self.screen.blit(
+                        self.info_manager.e_frames[cur_point], epos)
 
     def update(self):
         self.screen.fill(Config.bg)
@@ -178,7 +190,6 @@ class State:
             con = con_prev.create_connection(self, new_building, building)
             new_building.add_connection(building, con)
             building.add_connection(new_building, con)
-            if building.type == Building.ACTIVE:
-                self.add_gameobj(con)
+            self.add_gameobj(con)
         self.add_gameobj(new_building)
         self.tmp_preview_group.clear()

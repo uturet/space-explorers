@@ -26,8 +26,8 @@ class ColorFrameList:
                 self.rect.center = center
             self.draw_frame(image, color)
             converted = image.convert_alpha()
-            getattr(self, attr).append(
-                Frame(converted, self.rect, pygame.mask.from_surface(converted)))
+            getattr(self, attr).append(Frame(
+                converted, self.rect, pygame.mask.from_surface(converted)))
 
     def draw_frame(self, image, color):
         raise NotImplementedError()
