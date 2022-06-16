@@ -3,7 +3,6 @@ from core.config import Config
 import pygame
 import math
 from core.connection_manager import Connection
-
 from game_objects.object_type import Building, Particle
 
 

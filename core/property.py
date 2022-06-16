@@ -50,3 +50,30 @@ class EnergyInteraction:
         else:
             raise Exception(
                 f'Invalid {self.__class__.__name___}.type. Should be one of {",".join(self.LATENT, self.CONSUMER, self.PRODUCER)}, given {i}')
+
+
+class EnergySpreader:
+    BROADCAST = 0
+    DIRECT = 1
+    _es_type = DIRECT
+
+    @property
+    def es_type(self):
+        return self._es_type
+
+    @es_type.setter
+    def es_type(self, i):
+        if i in (self.BROADCAST, self.DIRECT):
+            self._es_type = i
+        else:
+            raise Exception(
+                f'Invalid {self.__class__.__name___}.type. Should be one of {",".join(self.BROADCAST, self.DIRECT)}, given {i}')
+
+
+class Battery:
+    capacity = 0
+    charge = 0
+
+    @property
+    def empty(self):
+        return self.charge == 0

@@ -33,10 +33,7 @@ def fill_players(size, state):
 
 
 def seed_buildings_rand(count, state, rect):
-    for i in range(count):
-        b = Generator((
-            random.randint(rect[0], rect[0] + rect[2]),
-            random.randint(rect[1], rect[1] + rect[3])
-        ))
-        b.set_type(Building.ACTIVE)
-        state.grid.add_item(b)
+    b = Generator((300, 300))
+    b.set_type(Building.ACTIVE)
+    b._ei_type = Building.PRODUCER
+    state.add_gameobj(b)

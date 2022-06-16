@@ -9,6 +9,9 @@ from core.animation import ColorFrameList, Frame
 
 class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 
+    health = 0
+    health_point = 0
+
     INACTIVE = 0
     HOVERED = 1
     SELECTED = 2
@@ -17,6 +20,8 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
     PLAN = 0
     ACTIVE = 1
     _type = PLAN
+
+    _default_ei_type = EnergyInteraction.LATENT
 
     hover_color = Config.yellow_400
     active_color = Config.green_400
@@ -28,6 +33,22 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
         self.colors = (Config.bluegrey_400, self.color)
         self.create_frame_set(pos)
         self.select_frame()
+
+    def receie_energy(self, state, charge):
+        self.health_point += charge
+        if self.health_point >= self.health:
+            self.health_point = self.health
+            if self._type == Building.PLAN:
+                self.activate(state)
+
+    def activate(self, state):
+        self._type = Building.ACTIVE
+        self._ei_type = self._default_ei_type
+        state.path_manager.remove_consumer(self)
+        state.path_manager.add_building(self)
+        self.select_frame()
+        for con in self.building_con.values():
+            state.grid.add_item(con)
 
     def create_frame_set(self, pos):
         for color in self.colors:

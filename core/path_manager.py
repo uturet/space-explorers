@@ -1,9 +1,9 @@
 
-from collections import deque
 from game_objects.object_type import Building
 from core.config import Config
 import math
 from collections import namedtuple
+from core.property import EnergyInteraction
 
 
 class PathManager:
@@ -21,11 +21,9 @@ class PathManager:
         if building.ei_type == Building.LATENT:
             self.update_paths()
         elif building.ei_type == Building.CONSUMER:
-            self.update_paths()
+            self.add_consumer(building)
         elif building.ei_type == Building.PRODUCER:
-
             self.add_producer(building)
-        self.visited.clear()
 
     def add_consumer(self, consumer):
         self.consumers.add(consumer)
@@ -36,8 +34,12 @@ class PathManager:
                 self.astart.clear()
 
     def remove_consumer(self, consumer):
+        self.consumers.remove(consumer)
         for producer in self.producers:
-            del self.paths[producer][consumer]
+            try:
+                del self.paths[producer][consumer]
+            except KeyError:
+                pass
 
     def add_producer(self, producer):
         self.producers.add(producer)
@@ -49,6 +51,7 @@ class PathManager:
                 self.astart.clear()
 
     def remove_producer(self, producer):
+        self.producers.remoev(producer)
         del self.paths[producer]
 
     def update_paths(self):
@@ -84,7 +87,8 @@ class AStar:
         )
         while cur_spr:
             for spr in cur_spr.building_con.keys():
-                if spr not in closed:
+                if (spr not in closed and
+                        spr._ei_type != EnergyInteraction.PRODUCER):
                     opened.add(spr)
                     self.update_table(cur_spr, spr)
 

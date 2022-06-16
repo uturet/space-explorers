@@ -42,7 +42,7 @@ class State:
         self.hotbar = ui.hotbar.Hotbar()
         self.minimap = ui.Minimap()
 
-        # pygame.time.set_timer(HIGLIGHT, 1000)
+        pygame.time.set_timer(HIGLIGHT, 1000)
 
         seed_buildings_rand(1, self, self.screen.get_rect())
 
@@ -56,25 +56,9 @@ class State:
         self.screen.blit(self.bg.image, self.bg.rect)
 
     def handle_higlight(self, state, event):
-        self.secounds_past += self.seconds
-
         for spr in self.gamegroup:
-            spr.set_ui_type(Building.INACTIVE)
-
-        for consumer, producers in self.path_manager.producers.items():
-            if not len(producers):
-                continue
-
-            for paths in producers.values():
-                path = paths[random.randint(0, len(paths)-1)]
-                for i, v in enumerate(path):
-                    if i == 0:
-                        consumer.building_con[v].activate()
-                    if i < (len(path)-1):
-                        try:
-                            v.building_con[path[i+1]].activate()
-                        except Exception:
-                            pass
+            for con in spr.building_con.values():
+                con.deactivate()
 
     def draw_group(self, group):
         while group:

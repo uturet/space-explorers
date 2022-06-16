@@ -1,10 +1,14 @@
 import pygame
 from game_objects.object_type import Building, Preview
 from core.config import Config
-from core.property import EnergyInteraction
+from core.property import EnergySpreader, Battery, EnergyInteraction
+
+THROUGHPUT = 100
 
 
 class Transmitter(Building):
+    health = 100
+
     width = 20
     height = width
     radius = width/2
@@ -32,16 +36,43 @@ class TransmitterPreview(Preview):
                            self.small_option_radius)
 
 
-class Generator(Building):
+class Generator(Building, Battery, EnergySpreader):
 
     width = 40
     height = width
     radius = width/2
     color = Config.green_500
 
+    health = 200
+    capacity = 100
+    charge = 0
+    production = 10
+
+    _default_ei_type = EnergyInteraction.PRODUCER
+
     def draw_frame(self, image, color):
         pygame.draw.circle(image, color,
                            (self.radius, self.radius), self.radius)
+
+    def update(self, state):
+        e = round(state.seconds * self.production, 4)
+        self.charge = min(self.capacity, self.charge + e)
+
+        if (self in state.path_manager.paths and
+                len(state.path_manager.paths[self])):
+            for consumer, path in state.path_manager.paths[self].items():
+                e = round(state.seconds * THROUGHPUT, 4)
+                if self.charge > e:
+                    self.charge -= e
+                else:
+                    e = self.charge
+                    self.charge = 0
+                consumer.receie_energy(state, e)
+                for con in path:
+                    con.activate()
+
+                if (self._es_type == EnergySpreader.DIRECT or self.charge == 0):
+                    break
 
 
 class GeneratorPreview(Preview):
