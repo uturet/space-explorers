@@ -87,8 +87,8 @@ class AStar:
         )
         while cur_spr:
             for spr in cur_spr.building_con.keys():
-                if (spr not in closed and
-                        spr._ei_type != EnergyInteraction.PRODUCER):
+                if (spr._ei_type != EnergyInteraction.PRODUCER and
+                        spr not in closed):
                     opened.add(spr)
                     self.update_table(cur_spr, spr)
 
@@ -96,14 +96,15 @@ class AStar:
             opened.remove(cur_spr)
             cur_spr = None
             for k, v in self.path_table.items():
-                if k in closed:
+                if k == end_spr:
+                    return self.get_path()
+                if k in closed or k._type == Building.PLAN:
                     continue
                 if cur_spr is None:
                     cur_spr = k
                 elif self.path_table[cur_spr].f > v.f:
                     cur_spr = k
-            if cur_spr == end_spr:
-                return self.get_path()
+
         self.clear()
 
     def clear(self):

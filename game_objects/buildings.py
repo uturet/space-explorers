@@ -46,9 +46,13 @@ class Generator(Building, Battery, EnergySpreader):
     health = 200
     capacity = 100
     charge = 0
-    production = 10
+    production = 0
 
     _default_ei_type = EnergyInteraction.PRODUCER
+
+    def activate(self, state):
+        super().activate(state)
+        self.production = 10
 
     def draw_frame(self, image, color):
         pygame.draw.circle(image, color,

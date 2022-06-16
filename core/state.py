@@ -1,7 +1,6 @@
 import pygame
 from core.config import Config
 import user_interface as ui
-from game_objects.buildings import Transmitter
 from game_objects.object_type import Building
 from core.event_manager import EventManager
 from core import collision_handler as ch
