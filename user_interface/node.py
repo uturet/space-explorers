@@ -12,7 +12,8 @@ class Node(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.parent = parent
 
-        self.image = pygame.Surface((self.width, self.height))
+        self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.image.fill((255, 255, 255, 0))
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
 

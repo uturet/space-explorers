@@ -27,10 +27,9 @@ class Hotbar(pygame.sprite.Sprite):
             round(Config.width / 2) - round(Config.hotbarwidth/2),
             Config.height
         )
-
-        self.selectbar = ui.hotbar.Selectbar(parent=self)
-        self.infobar = ui.hotbar.InfoBar(parent=self)
-        self.multi_infobar = ui.hotbar.MultiInfoBar(parent=self)
+        self.selectbar = ui.hotbar.Selectbar(self)
+        self.infobar = ui.hotbar.InfoBar(self)
+        self.multi_infobar = ui.hotbar.MultiInfoBar(self)
         self.mods = (self.selectbar, self.infobar, self.multi_infobar)
 
     def handle_hotbarselectmod(self, state, event):
@@ -65,6 +64,7 @@ class Hotbar(pygame.sprite.Sprite):
 class HotbarMod(ui.Node, ABC):
     width = Config.hotbarwidth
     height = Config.hotbarheight
+    mod_index = None
 
     def __init__(self, parent):
         ui.Node.__init__(self, parent)

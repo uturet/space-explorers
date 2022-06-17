@@ -61,6 +61,9 @@ class Generator(Building, Battery, EnergySpreader):
     HEAL = 2
     _p_type = BUILD
 
+    def set_priority(self, p):
+        self._p_type = p
+
     _es_type = EnergySpreader.BROADCAST
 
     def activate(self, state):
@@ -118,15 +121,16 @@ class Generator(Building, Battery, EnergySpreader):
                     consumer.receie_energy(state, e)
                     for con in path:
                         con.activate()
-            elif self._es_type == EnergySpreader.DIRECT:
+            elif (self._es_type == EnergySpreader.DIRECT and
+                  len(priority[next_p_type][0])):
                 e = round(state.seconds * THROUGHPUT, 4)
                 if self.charge > e:
                     self.charge -= e
                 else:
                     e = self.charge
                     self.charge = 0
-                priority[next_p_type][0].receie_energy(state, e)
-                for con in priority[next_p_type][1]:
+                priority[next_p_type][0][0].receie_energy(state, e)
+                for con in priority[next_p_type][1][0]:
                     con.activate()
 
 

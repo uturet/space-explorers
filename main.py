@@ -10,6 +10,7 @@ class Game:
         pygame.init()
         self.state = State()
         self.clock = pygame.time.Clock()
+        pygame.font.init()
 
     def main_loop(self):
         running = True

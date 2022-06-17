@@ -1,5 +1,5 @@
 from game_objects.object_type import Building
-from user_interface.hotbar import HotbarMod, ControlBar
+from user_interface.hotbar import HotbarMod, ControlBar, Hotbar
 from user_interface import Node
 from game_objects.buildings import building_previews
 from core import collision_handler as ch
@@ -12,12 +12,14 @@ import math
 class MultiInfoBar(HotbarMod):
     info_providers = set()
     _previews = set()
+    mod_index = Hotbar.MULTI_INFOMOD
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
         self.infobar_preview = None
         self.control_bar = ControlBar(
-            self, self.width, self.height, MultiInfobarPreview.width)
+            self, self.width,
+            self.height, MultiInfobarPreview.width)
 
     def set_info_providers(self, sprites):
         self.info_providers = sprites

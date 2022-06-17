@@ -157,7 +157,7 @@ class State:
     def set_group_attachmet(self):
         self.allgroup = pygame.sprite.Group()
         self.uigroup = pygame.sprite.LayeredUpdates()
-        self.interactable_group = pygame.sprite.Group()
+        self.interactable_group = pygame.sprite.LayeredUpdates()
         self.gamegroup = pygame.sprite.Group()
         self.partgroup = pygame.sprite.Group()
 
@@ -167,6 +167,8 @@ class State:
         Particle.groups = (self.partgroup)
 
         ui.Background._layer = 1
+        ui.Node._layer = 1
+        ui.Button._layer = 2
         ui.Mouse._layer = 2
         ui.Minimap._layer = 9
         ui.hotbar.Hotbar._layer = 9
