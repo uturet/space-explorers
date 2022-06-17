@@ -1,17 +1,18 @@
+from core.property import Battery
+from user_interface import InfoManager
+from core.connection_manager import ConnectionManager
+from core.path_manager import PathManager
 import pygame
 from core.config import Config
 import user_interface as ui
-from game_objects.object_type import Building
+from game_objects.object_type import Building, Particle
 from core.event_manager import EventManager
 from core import collision_handler as ch
 from core.grid import Grid
 from seeder import seed_buildings_rand
 from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
-from game_objects.buildings import building_previews, TransmitterPreview, GeneratorPreview
-from core.path_manager import PathManager
-from core.connection_manager import ConnectionManager
-from user_interface import InfoManager
-from core.property import Battery
+from game_objects.buildings import (
+    building_previews, TransmitterPreview, GeneratorPreview, LaserGunPreview)
 
 
 class State:
@@ -98,8 +99,8 @@ class State:
                     spr.rect.left, spr.rect.top))
 
         self.draw_group(self.buildgroup)
-        self.draw_group(self.partgroup)
 
+        self.partgroup.update(self)
         self.uigroup.draw(self.screen)
 
     def handle_mousemotion(self, state, event):
@@ -158,10 +159,12 @@ class State:
         self.uigroup = pygame.sprite.LayeredUpdates()
         self.interactable_group = pygame.sprite.Group()
         self.gamegroup = pygame.sprite.Group()
+        self.partgroup = pygame.sprite.Group()
 
         Building._layer = 3
 
         Building.groups = (self.allgroup, self.gamegroup)
+        Particle.groups = (self.partgroup)
 
         ui.Background._layer = 1
         ui.Mouse._layer = 2
@@ -177,11 +180,22 @@ class State:
 
         building_previews['Transmitter'] = TransmitterPreview()
         building_previews['Generator'] = GeneratorPreview()
+        building_previews['LaserGun'] = LaserGunPreview()
 
     def add_gameobj(self, obj):
         self.grid.add_item(obj)
         if isinstance(obj, Building):
             self.path_manager.add_building(obj)
+
+    def remove_gameobj(self, obj):
+        self.grid.remove_item(obj)
+        if isinstance(obj, Building):
+            self.path_manager.remove_building(obj)
+            for building, con in obj.building_con.items():
+                building.remove_connection(obj)
+                self.grid.remove_item(con)
+                con.kill()
+        obj.kill()
 
     def create_selected_building(self, preview):
         new_building = preview.building(self.mouse.bg_rect.center)

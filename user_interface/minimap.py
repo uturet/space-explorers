@@ -31,7 +31,7 @@ class Minimap(pygame.sprite.Sprite):
             pygame.draw.circle(self.image, pl.color,
                                (int(pl.rect.centerx * self.factorx),
                                 int(pl.rect.centery * self.factory)
-                                ), 2)
+                                ), int(pl.rect.width/20))
 
         pygame.draw.rect(self.image, (255, 255, 255), (
             round(-state.bg.rect.left * self.factorx, 0),

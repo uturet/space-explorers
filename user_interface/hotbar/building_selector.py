@@ -85,8 +85,10 @@ class SelectorOption(Node):
         else:
             self.image.fill(self.default_color)
         if self.is_active:
-            pygame.draw.rect(self.image, self.active_color, self.rect, 4)
-        self.preview.draw_option_image(self.rect, self.image)
+            pygame.draw.rect(self.image, self.active_color,
+                             (0, 0, self.width, self.height), 4)
+        self.preview.draw_option_image(
+            (self.width/2, self.height/2), self.image)
 
     def update(self, state):
         pass

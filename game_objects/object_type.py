@@ -2,8 +2,7 @@ import pygame
 from abc import ABC, abstractmethod
 from core.config import Config
 from core import collision_handler as ch
-from core.property import EnergyInteraction
-from core.event import HOTBARINFOMOD
+from core.property import EnergyInteraction, Battery
 from core.animation import ColorFrameList, Frame
 
 
@@ -11,6 +10,12 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 
     health = 0
     health_point = 0
+
+    chargable = Battery.chargable
+
+    @property
+    def undamaged(self):
+        return self.health == self.health_point
 
     INACTIVE = 0
     HOVERED = 1
@@ -41,10 +46,15 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
             if self._type == Building.PLAN:
                 self.activate(state)
 
+    def receive_damage(self, state, damage):
+        self.health_point -= damage
+        if self.health_point <= 0:
+            state.remove_gameobj(self)
+
     def activate(self, state):
         self._type = Building.ACTIVE
         self._ei_type = self._default_ei_type
-        state.path_manager.remove_consumer(self)
+        # state.path_manager.remove_consumer(self)
         state.path_manager.add_building(self)
         self.select_frame()
 
@@ -143,11 +153,11 @@ class Preview(ABC, ColorFrameList):
         self.select_frame(0)
 
     @ abstractmethod
-    def draw_option_image(self, rect, image=None):
+    def draw_option_image(self, center, image=None):
         pass
 
     @ abstractmethod
-    def draw_small_option_image(self, rect, image=None):
+    def draw_small_option_image(self, center, image=None):
         pass
 
     def handle_mousemotion(self, state, event):

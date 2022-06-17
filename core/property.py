@@ -73,7 +73,14 @@ class EnergySpreader:
 class Battery:
     capacity = 0
     charge = 0
+    chargable = False
 
     @property
-    def empty(self):
-        return self.charge == 0
+    def full(self):
+        return self.charge == self.capacity
+
+
+class Gun:
+    fire = True
+    power = 0
+    light_beem = None

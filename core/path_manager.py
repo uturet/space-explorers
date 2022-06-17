@@ -25,13 +25,16 @@ class PathManager:
         elif building.ei_type == Building.PRODUCER:
             self.add_producer(building)
 
+    def remove_building(self, building):
+        self.remove_consumer(building)
+        if building in self.producers:
+            self.remove_producer(building)
+
     def add_consumer(self, consumer):
-        self.consumers.add(consumer)
-        for producer in self.producers:
-            path = self.astart.find_path(producer, consumer)
-            if path:
-                self.paths[producer][consumer] = path
-                self.astart.clear()
+        if consumer not in self.consumers:
+            self.consumers.add(consumer)
+            for producer in self.producers:
+                self.find_path(producer, consumer)
 
     def remove_consumer(self, consumer):
         self.consumers.remove(consumer)
@@ -42,25 +45,28 @@ class PathManager:
                 pass
 
     def add_producer(self, producer):
-        self.producers.add(producer)
-        self.paths[producer] = {}
-        for consumer in self.consumers:
-            path = self.astart.find_path(producer, consumer)
-            if path:
-                self.paths[producer][consumer] = path
-                self.astart.clear()
+        if producer not in self.producers:
+            self.producers.add(producer)
+            self.paths[producer] = {}
+            for consumer in self.consumers:
+                self.find_path(producer, consumer)
 
     def remove_producer(self, producer):
-        self.producers.remoev(producer)
+        self.producers.remove(producer)
         del self.paths[producer]
 
     def update_paths(self):
         for producer in self.producers:
             for consumer in self.consumers:
-                path = self.astart.find_path(producer, consumer)
-                if path:
-                    self.paths[producer][consumer] = path
-                    self.astart.clear()
+                self.find_path(producer, consumer)
+
+    def find_path(self, producer, consumer):
+        if producer == consumer:
+            return
+        path = self.astart.find_path(producer, consumer)
+        if path:
+            self.paths[producer][consumer] = path
+            self.astart.clear()
 
 
 VerticeWeight = namedtuple('VerticeWeight', 'g h f prev')

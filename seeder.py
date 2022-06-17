@@ -38,5 +38,5 @@ def seed_buildings_rand(count, state, rect):
     b._ei_type = Building.PRODUCER
     b.health_point = b.health
     b.charge = b.capacity
-    b.production = 10
+    b.production = 100
     state.add_gameobj(b)

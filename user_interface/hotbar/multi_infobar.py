@@ -35,7 +35,7 @@ class MultiInfoBar(HotbarMod):
             p = MultiInfobarPreviewOption(self)
             self._previews.add(p)
             building_previews[sprite.__class__.__name__]\
-                .draw_small_option_image(p.rect, p.image)
+                .draw_small_option_image(p.rect.center, p.image)
             p.rect.left = (i % x_shift) * p.rect.w
             p.rect.top = min(math.floor(i/x_shift),
                              math.ceil(i/x_shift)) * p.rect.h
