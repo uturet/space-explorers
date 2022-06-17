@@ -61,6 +61,8 @@ class Generator(Building, Battery, EnergySpreader):
     HEAL = 2
     _p_type = BUILD
 
+    _es_type = EnergySpreader.BROADCAST
+
     def activate(self, state):
         super().activate(state)
         self.production = 10
@@ -75,10 +77,8 @@ class Generator(Building, Battery, EnergySpreader):
 
         if (self in state.path_manager.paths and
                 len(state.path_manager.paths[self])):
-            cur_consumer = None
-            cur_path = None
+            priority = [([], []), ([], []), ([], [])]
             for consumer, path in state.path_manager.paths[self].items():
-
                 if consumer.chargable:
                     if (consumer.undamaged and
                             consumer.full):
@@ -87,44 +87,47 @@ class Generator(Building, Battery, EnergySpreader):
                     if consumer.undamaged:
                         continue
 
-                if cur_consumer is None:
-                    cur_consumer = consumer
-                    cur_path = path
-                elif self._p_type == Generator.BUILD:
-                    if cur_consumer._type == Building.PLAN:
-                        continue
-                    elif consumer._type == Building.PLAN:
-                        cur_consumer = consumer
-                        cur_path = path
-                elif self._p_type == Generator.CHARGE:
-                    if cur_consumer.chargable and not cur_consumer.full:
-                        continue
-                    elif consumer.chargable and not consumer.full:
-                        cur_consumer = consumer
-                        cur_path = path
-                elif self._p_type == Generator.HEAL:
-                    if (not cur_consumer.undamaged or
-                        consumer._type == Building.PLAN or
-                            consumer.undamaged):
-                        continue
-                    elif consumer.undamaged:
-                        cur_consumer = consumer
-                        cur_path = path
+                if consumer._type == Building.PLAN:
+                    priority[self.BUILD][0].append(consumer)
+                    priority[self.BUILD][1].append(path)
+                if consumer.chargable and not consumer.full:
+                    priority[self.CHARGE][0].append(consumer)
+                    priority[self.CHARGE][1].append(path)
+                if not consumer.undamaged:
+                    priority[self.HEAL][0].append(consumer)
+                    priority[self.HEAL][1].append(path)
 
-            if cur_consumer is None:
-                return
-            e = round(state.seconds * THROUGHPUT, 4)
-            if self.charge > e:
-                self.charge -= e
-            else:
-                e = self.charge
-                self.charge = 0
-            cur_consumer.receie_energy(state, e)
-            for con in cur_path:
-                con.activate()
+            next_p_type = self._p_type
+            if not len(priority[self._p_type][0]):
+                if len(priority[self.BUILD][0]):
+                    next_p_type = self.BUILD
+                elif len(priority[self.CHARGE][0]):
+                    next_p_type = self.CHARGE
+                elif len(priority[self.HEAL][0]):
+                    next_p_type = self.HEAL
 
-            if (self._es_type == EnergySpreader.DIRECT or self.charge == 0):
-                pass
+            if self._es_type == EnergySpreader.BROADCAST:
+                e = round(state.seconds * THROUGHPUT, 4)
+                if e * len(priority[next_p_type][0]) > self.charge:
+                    e = round(self.charge / len(priority[next_p_type][0]), 4)
+                    self.charge = 0
+                else:
+                    self.charge -= e * len(priority[next_p_type][0])
+                for consumer, path in zip(
+                        priority[next_p_type][0], priority[next_p_type][1]):
+                    consumer.receie_energy(state, e)
+                    for con in path:
+                        con.activate()
+            elif self._es_type == EnergySpreader.DIRECT:
+                e = round(state.seconds * THROUGHPUT, 4)
+                if self.charge > e:
+                    self.charge -= e
+                else:
+                    e = self.charge
+                    self.charge = 0
+                priority[next_p_type][0].receie_energy(state, e)
+                for con in priority[next_p_type][1]:
+                    con.activate()
 
 
 class GeneratorPreview(Preview):
