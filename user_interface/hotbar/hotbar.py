@@ -1,5 +1,4 @@
 import user_interface as ui
-from game_objects.buildings import Building
 from core.config import Config
 from abc import ABC
 import pygame
@@ -11,8 +10,7 @@ class Hotbar(pygame.sprite.Sprite):
     INFOMOD = 1
     MULTI_INFOMOD = 2
 
-    DEFAULT_MOD = SELECTMOD
-    active_mod_index = DEFAULT_MOD
+    active_mod_index = SELECTMOD
 
     width = Config.hotbarwidth
     height = Config.hotbarheight
@@ -21,7 +19,6 @@ class Hotbar(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = pygame.Surface(
             (Config.hotbarwidth, Config.hotbarheight))
-        self.paintbar()
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (
             round(Config.width / 2) - round(Config.hotbarwidth/2),
@@ -31,6 +28,7 @@ class Hotbar(pygame.sprite.Sprite):
         self.infobar = ui.hotbar.InfoBar(self)
         self.multi_infobar = ui.hotbar.MultiInfoBar(self)
         self.mods = (self.selectbar, self.infobar, self.multi_infobar)
+        self.draw()
 
     def handle_hotbarselectmod(self, state, event):
         self.set_active_mod(self.SELECTMOD)
@@ -48,31 +46,38 @@ class Hotbar(pygame.sprite.Sprite):
                 self.SELECTMOD, self.INFOMOD, self.MULTI_INFOMOD):
             self.active_mod_index = mod_index
 
+    def handle_mousebuttondown(self, state, event):
+        if (self in state.mouse_intersected and
+                hasattr(self.active_mod, 'handle_mousebuttondown')):
+            event.pos = (event.pos[0] - self.rect.left,
+                         event.pos[1] - self.rect.top)
+            self.active_mod.handle_mousebuttondown(state, event)
+            self.draw()
+
+    def handle_mousebuttonup(self, state, event):
+        if (hasattr(self.active_mod, 'handle_mousebuttonup')):
+            event.pos = (event.pos[0] - self.rect.left,
+                         event.pos[1] - self.rect.top)
+            self.active_mod.handle_mousebuttonup(state, event)
+            self.draw()
+
+    def handle_mousewheel(self, state, event):
+        if (hasattr(self.active_mod, 'handle_mousewheel')):
+            self.active_mod.handle_mousewheel(state, event)
+            self.draw()
+
+    def handle_mousemotion(self, state, event):
+        if (hasattr(self.active_mod, 'handle_mousemotion')):
+            self.active_mod.handle_mousemotion(state, event)
+
     @property
     def active_mod(self):
         return self.mods[self.active_mod_index]
 
-    def paintbar(self):
-        self.image.fill(Config.dark)
-
     def update(self, state):
-        self.paintbar()
         self.image.blit(self.active_mod.image, self.active_mod.rect.topleft)
         self.active_mod.update(state)
 
-
-class HotbarMod(ui.Node, ABC):
-    width = Config.hotbarwidth
-    height = Config.hotbarheight
-    mod_index = None
-
-    def __init__(self, parent):
-        ui.Node.__init__(self, parent)
-        self.paintbar()
-        self.rect.topleft = (0, 0)
-
-    def paintbar(self):
-        self.image.fill(Config.bluegrey_500)
-
-    def update(self, state):
-        pass
+    def draw(self):
+        self.image.fill(Config.dark)
+        self.active_mod.draw()

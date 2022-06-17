@@ -1,7 +1,5 @@
-from user_interface.hotbar import Hotbar
 from user_interface import Node, Button
 import pygame
-from core.event import HOTBARSELECTMOD
 from core.config import Config
 from game_objects.buildings import Generator
 

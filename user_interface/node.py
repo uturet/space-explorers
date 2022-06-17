@@ -9,7 +9,7 @@ class Node(pygame.sprite.Sprite):
     color = Config.black
 
     def __init__(self, parent=None):
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        pygame.sprite.Sprite.__init__(self)
         self.parent = parent
 
         self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)

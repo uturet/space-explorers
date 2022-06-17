@@ -13,13 +13,14 @@ def get_circular_intersect_sprites_by_pos(pos, sprites, collisions):
 
 def get_rect_intersect_sprites_by_pos(pos, sprites, collisions):
     for sp in sprites:
-        if isinstance(sp, Node):
-            coords = sp.calculate_abs_coords()
-        else:
-            coords = sp.rect
-        if coords.left < pos[0] < coords.right and \
-                coords.top < pos[1] < coords.bottom:
+        if sp.rect.left < pos[0] < sp.rect.right and \
+                sp.rect.top < pos[1] < sp.rect.bottom:
             collisions.add(sp)
+
+
+def is_pos_intersects_rect(pos, rect):
+    return (rect.left < pos[0] < rect.right and
+            rect.top < pos[1] < rect.bottom)
 
 
 def rect_collides(rect, sprites, collisions):

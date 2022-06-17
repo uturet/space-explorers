@@ -1,21 +1,21 @@
 from game_objects.object_type import Building
-from user_interface.hotbar import HotbarMod, ControlBar, Hotbar
+from user_interface.hotbar import ControlBar
 from user_interface import Node
 from game_objects.buildings import building_previews
 from core import collision_handler as ch
 from core.config import Config
-import itertools
 import pygame
 import math
 
 
-class MultiInfoBar(HotbarMod):
-    info_providers = set()
-    _previews = set()
-    mod_index = Hotbar.MULTI_INFOMOD
+class MultiInfoBar(Node):
+    width = Config.hotbarwidth
+    height = Config.hotbarheight
 
     def __init__(self, parent):
         super().__init__(parent)
+        self. info_providers = set()
+        self._previews = set()
         self.infobar_preview = None
         self.control_bar = ControlBar(
             self, self.width,

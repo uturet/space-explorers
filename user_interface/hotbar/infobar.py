@@ -1,11 +1,13 @@
 from game_objects.object_type import Building
-from user_interface.hotbar import HotbarMod, ControlBar, Hotbar
+from user_interface.hotbar import ControlBar
 from user_interface import Node
 from game_objects.buildings import building_previews
+from core.config import Config
 
 
-class InfoBar(HotbarMod):
-    mod_index = Hotbar.INFOMOD
+class InfoBar(Node):
+    width = Config.hotbarwidth
+    height = Config.hotbarheight
 
     def __init__(self, parent):
         super().__init__(parent)

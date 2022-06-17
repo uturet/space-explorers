@@ -19,7 +19,7 @@ class Transmitter(Building):
     radius = width/2
     color = Config.blue_500
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         pygame.draw.circle(image, color,
                            (self.radius, self.radius), self.radius)
 
@@ -28,7 +28,7 @@ class TransmitterPreview(Preview):
     building = Transmitter
     preview_color = Config.blue_200
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         pygame.draw.circle(image, color,
                            self.rect.center, self.radius)
 
@@ -70,7 +70,7 @@ class Generator(Building, Battery, EnergySpreader):
         super().activate(state)
         self.production = 10
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         pygame.draw.circle(image, color,
                            (self.radius, self.radius), self.radius)
 
@@ -138,7 +138,7 @@ class GeneratorPreview(Preview):
     building = Generator
     preview_color = Config.green_200
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         pygame.draw.circle(image, color,
                            self.rect.center, self.radius)
 
@@ -192,7 +192,7 @@ class LaserGun(Building, Battery, Gun):
         self._ei_type = self._default_ei_type
         self.select_frame()
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         pygame.draw.circle(image, color,
                            (self.radius, self.radius), self.radius)
 
@@ -217,7 +217,7 @@ class LaserGunPreview(Preview):
     building = LaserGun
     preview_color = Config.purple_200
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         pygame.draw.circle(image, color,
                            self.rect.center, self.radius)
 

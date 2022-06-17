@@ -8,7 +8,7 @@ class Config(MaterialColors):
     minimapwidth = 200
     minimapheight = 200
     hotbarwidth = 500
-    hotbarheight = 130
+    hotbarheight = 100
 
     preview_cover_size = 200
     preview_cover_radius = 100

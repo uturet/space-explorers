@@ -52,7 +52,6 @@ class State:
             self,
             *self.uigroup,
             self.bg,
-            *self.interactable_group,
             self.mouse,
         )
         self.screen.blit(self.bg.image, self.bg.rect)
@@ -113,12 +112,6 @@ class State:
             self.uigroup,
             self.mouse_intersected
         )
-        ch.get_rect_intersect_sprites_by_pos(
-            event.pos,
-            self.interactable_group,
-            self.mouse_intersected
-        )
-
         if (self.minimap not in self.mouse_intersected and
             self.hotbar not in self.mouse_intersected and
                 self.mouse.active_mod == self.mouse.INACTIVE):
@@ -152,28 +145,21 @@ class State:
                     {'sprite': tuple(self.mouse_select)[0]}
                 ))
         else:
-            self.hotbar.set_active_mod(self.hotbar.DEFAULT_MOD)
+            self.hotbar.set_active_mod(self.hotbar.SELECTMOD)
 
     def set_group_attachmet(self):
         self.allgroup = pygame.sprite.Group()
         self.uigroup = pygame.sprite.LayeredUpdates()
-        self.interactable_group = pygame.sprite.LayeredUpdates()
         self.gamegroup = pygame.sprite.Group()
         self.partgroup = pygame.sprite.Group()
-
-        Building._layer = 3
 
         Building.groups = (self.allgroup, self.gamegroup)
         Particle.groups = (self.partgroup)
 
         ui.Background._layer = 1
-        ui.Node._layer = 1
-        ui.Button._layer = 2
         ui.Mouse._layer = 2
         ui.Minimap._layer = 9
         ui.hotbar.Hotbar._layer = 9
-
-        ui.Node.groups = (self.interactable_group)
 
         ui.Mouse.groups = (self.allgroup, self.uigroup)
         ui.hotbar.Hotbar.groups = (self.allgroup, self.uigroup)

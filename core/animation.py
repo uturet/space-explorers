@@ -16,18 +16,20 @@ class ColorFrameList:
         self.rect = getattr(self, attr)[i].rect
         self.mask = getattr(self, attr)[i].mask
 
-    def create_frames(self, attr='frames', center=None):
+    def create_frames(self, attr='frames', center=None, left=None):
         self.frames = []
-        for color in self.colors:
+        for i, color in enumerate(self.colors):
             image = pygame.Surface(
                 (self.width, self.height), pygame.SRCALPHA)
             self.rect = image.get_rect()
             if center:
                 self.rect.center = center
-            self.draw_frame(image, color)
+            if left:
+                self.rect.left = left
+            self.draw_frame(image, color, i)
             converted = image.convert_alpha()
             getattr(self, attr).append(Frame(
                 converted, self.rect, pygame.mask.from_surface(converted)))
 
-    def draw_frame(self, image, color):
+    def draw_frame(self, image, color, index=None):
         raise NotImplementedError()
