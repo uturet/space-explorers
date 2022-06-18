@@ -1,3 +1,4 @@
+from operator import gt
 from game_objects.object_type import Building
 from user_interface import Node
 from game_objects.buildings import building_previews
@@ -6,8 +7,6 @@ from game_objects.buildings import Generator, LaserGun
 import pygame
 from core import collision_handler as ch
 from collections import namedtuple
-import math
-import random
 
 
 class InfoBar(Node):
@@ -53,35 +52,40 @@ class MultiInfoBar(Node):
 
     def __init__(self):
         super().__init__()
-        self.btngroups = [
-            GeneratorControlBar(),
-            LaserGunControlBar(),
-        ]
-        self.groups = [[] for i in range(len(self.btngroups))]
-        self.groups_images = []
-        self.cur_btngroup = 0
+        self.btngroups = {
+            GeneratorControlBar.controls.__name__: GeneratorControlBar(),
+            LaserGunControlBar.controls.__name__: LaserGunControlBar(),
+        }
+
+        self.groups = {}
+        self.groups_images = {}
+        self.cur_btngroup = None
         self.groups_image = pygame.Surface(
-            (self.height+15, self.group_height*len(building_previews)), pygame.SRCALPHA)
+            (self.height, self.group_height*len(building_previews)), pygame.SRCALPHA)
         self.groups_rect = self.groups_image.get_rect()
         self.create_groups_images()
 
     def set_info_providers(self, sprites):
-        self.cur_btngroup = 0
-        self.groups = [[] for i in range(len(self.btngroups))]
+        self.cur_btngroup = None
+        self.groups = {}
         for spr in sprites:
-            for index, btngroup in enumerate(self.btngroups):
-                if isinstance(spr, btngroup.controls):
-                    self.groups[index].append(spr)
-                    break
+            if self.cur_btngroup is None:
+                self.cur_btngroup = spr.__class__.__name__
+            if spr.__class__.__name__ not in self.groups:
+                self.groups[spr.__class__.__name__] = []
+            self.groups[spr.__class__.__name__].append(spr)
+        for gtype, group in self.groups.items():
+            if gtype in self.btngroups:
+                self.btngroups[gtype].set_buildings(group)
 
     def create_groups_images(self):
-        size = 14
+        size = 10
         cross = pygame.Surface((size, size), pygame.SRCALPHA)
-        pygame.draw.line(cross, (255, 255, 255), (0, 0), (size, size), 4)
-        pygame.draw.line(cross, (255, 255, 255), (-1, size), (size, -1), 4)
+        pygame.draw.line(cross, (255, 255, 255), (0, 0), (size, size), 3)
+        pygame.draw.line(cross, (255, 255, 255), (-1, size), (size, -1), 3)
 
-        for index, preview in enumerate(building_previews.values()):
-            self.groups_images.append([])
+        for spr_type, preview in building_previews.items():
+            self.groups_images[spr_type] = []
             for active in (False, True):
                 image = pygame.Surface(
                     (self.groups_rect.width, 40), pygame.SRCALPHA)
@@ -91,18 +95,20 @@ class MultiInfoBar(Node):
                 if active:
                     pygame.draw.rect(image, (255, 255, 255),
                                      (0, 0, rect.width, rect.height), 2)
-                image.blit(cross, (45, 13))
-                self.groups_images[index].append(Frame(image, rect))
+                image.blit(cross, (40, 15))
+                self.groups_images[spr_type].append(Frame(image, rect))
 
     def handle_mousebuttonup(self, state, event):
         if event.button == 1:
             if event.pos[0] <= self.groups_rect.width:
                 index = int(
                     (event.pos[1]-self.groups_rect.top)/self.group_height)
-                if 0 <= index <= len(self.groups_images):
-                    self.cur_btngroup = index
-            else:
-                event.pos = (event.pos[0]-self.groups_rect.width, event.pos[1])
+                if 0 <= index <= len(self.groups):
+                    self.cur_btngroup = list(self.groups.keys())[index]
+            elif (self.cur_btngroup is not None and
+                  self.cur_btngroup in self.btngroups):
+                self.btngroups[self.cur_btngroup].handle_mousebuttonup(
+                    state, event)
 
     def handle_mousewheel(self, state, event):
         self.groups_rect.center = (
@@ -114,14 +120,23 @@ class MultiInfoBar(Node):
         self.image.fill((255, 255, 255, 0))
         self.groups_image.fill((255, 255, 255, 0))
         font = pygame.font.SysFont(pygame.font.get_default_font(), 35)
-        for index, group in enumerate(self.groups_images):
+
+        index = 0
+        for gtype, group in self.groups.items():
+            if self.cur_btngroup is None:
+                self.cur_btngroup = gtype
             text = font.render(
-                f'{random.randint(0, 1000)}', False, (255, 255, 255))
-            if index == self.cur_btngroup:
-                self.groups_image.blit(group[1].image, (0, index*40))
+                f'{len(group)}', False, (255, 255, 255))
+            if self.cur_btngroup == gtype:
+                self.groups_image.blit(
+                    self.groups_images[gtype][1].image, (0, index*40))
             else:
-                self.groups_image.blit(group[0].image, (0, index*40))
+                self.groups_image.blit(
+                    self.groups_images[gtype][0].image, (0, index*40))
             self.groups_image.blit(text, (70, (index*40)+9))
+            index += 1
+        if self.cur_btngroup in self.btngroups:
+            self.btngroups[self.cur_btngroup].draw(self.image)
         self.image.blit(self.groups_image, self.groups_rect.topleft)
 
 
@@ -183,6 +198,7 @@ class GeneratorControlBar(ToggleGroupsManager):
     def __init__(self):
         super().__init__()
         self.building = None
+        self.buildings = None
         self.pgroup = ('BUILD', 'CHARGE', 'HEAL')
         self.handler_pgroup = (
             self.set_p_build, self.set_p_charge, self.set_p_heal)
@@ -196,24 +212,54 @@ class GeneratorControlBar(ToggleGroupsManager):
         self.selected[0] = building._p_type
         self.selected[1] = building._es_type
 
+    def set_buildings(self, buildings):
+        self.buildings = buildings
+        self.selected[0] = buildings[0]._p_type
+        self.selected[1] = buildings[0]._es_type
+        for b in buildings:
+            if b._p_type != self.selected[0]:
+                self.selected[0] = None
+            if b._es_type != self.selected[1]:
+                self.selected[1] = None
+
     def create_controlbar(self):
         self.create_group((100, 40), self.pgroup, self.handler_pgroup)
         self.create_group((260, 40), self.esgroup, self.handler_esgroup)
 
     def set_p_build(self, state, event):
-        self.building._p_type = Generator.BUILD
+        if self.building:
+            self.building._p_type = Generator.BUILD
+        elif self.buildings:
+            for b in self.buildings:
+                b._p_type = Generator.BUILD
 
     def set_p_charge(self, state, event):
-        self.building._p_type = Generator.CHARGE
+        if self.building:
+            self.building._p_type = Generator.CHARGE
+        elif self.buildings:
+            for b in self.buildings:
+                b._p_type = Generator.CHARGE
 
     def set_p_heal(self, state, event):
-        self.building._p_type = Generator.HEAL
+        if self.building:
+            self.building._p_type = Generator.HEAL
+        elif self.buildings:
+            for b in self.buildings:
+                b._p_type = Generator.HEAL
 
     def set_es_broadcast(self, state, event):
-        self.building._es_type = Generator.BROADCAST
+        if self.building:
+            self.building._es_type = Generator.BROADCAST
+        elif self.buildings:
+            for b in self.buildings:
+                b._es_type = Generator.BROADCAST
 
     def set_es_direct(self, state, event):
-        self.building._es_type = Generator.DIRECT
+        if self.building:
+            self.building._es_type = Generator.DIRECT
+        elif self.buildings:
+            for b in self.buildings:
+                b._es_type = Generator.DIRECT
 
 
 class LaserGunControlBar(ToggleGroupsManager):
@@ -223,15 +269,37 @@ class LaserGunControlBar(ToggleGroupsManager):
         super().__init__()
         self.building = None
         self.fgroup = ('HOLD', 'FIRE')
-        self.handler_fgroup = (self.set_fire, self.set_fire)
+        self.handler_fgroup = (self.set_hold, self.set_fire)
         self.create_controlbar()
 
     def set_building(self, building):
         self.building = building
         self.selected[0] = int(building.fire)
 
+    def set_buildings(self, buildings):
+        self.buildings = buildings
+        self.selected[0] = int(buildings[0].fire)
+        for b in buildings:
+            if b.fire != self.selected[0]:
+                self.selected[0] = None
+
     def create_controlbar(self):
         self.create_group((100, 40), self.fgroup, self.handler_fgroup)
 
     def set_fire(self, state, event):
-        self.building.fire = not self.building.fire
+        if self.building:
+            self.building.fire = 1
+        elif self.buildings:
+            if self.selected[0] is None:
+                self.selected[0] = 1
+            for b in self.buildings:
+                b.fire = 1
+
+    def set_hold(self, state, event):
+        if self.building:
+            self.building.fire = 0
+        elif self.buildings:
+            if self.selected[0] is None:
+                self.selected[0] = 0
+            for b in self.buildings:
+                b.fire = 0
