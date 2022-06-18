@@ -34,7 +34,7 @@ def fill_players(size, state):
 
 def seed_buildings_rand(count, state, rect):
     b = Generator((300, 300))
-    b.set_type(Building.ACTIVE)
+    b.type = Building.ACTIVE
     b._ei_type = Building.PRODUCER
     b.health_point = b.health
     b.charge = b.capacity

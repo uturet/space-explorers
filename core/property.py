@@ -81,6 +81,6 @@ class Battery:
 
 
 class Gun:
-    fire = True
+    fire = False
     power = 0
     light_beem = None

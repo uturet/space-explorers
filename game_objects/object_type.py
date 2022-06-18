@@ -13,10 +13,6 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 
     chargable = Battery.chargable
 
-    @property
-    def undamaged(self):
-        return self.health == self.health_point
-
     INACTIVE = 0
     HOVERED = 1
     SELECTED = 2
@@ -36,13 +32,17 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.building_con = {}
         self.frameset = []
-        self.colors = (Config.bluegrey_400, self.color)
+        self.colors = (Config.bluegrey_400, self.color, Config.red_900)
         self.create_frame_set(pos)
         self.select_frame()
 
     def receie_energy(self, state, charge):
         if self._type == Building.DESTROY:
-            self.receive_damage(state, charge)
+            self.receive_damage(state, charge*5)
+        elif self.chargable and self.health_point == self.health:
+            self.charge += charge
+            if self.charge >= self.capacity:
+                self.charge = self.capacity
         else:
             self.health_point += charge
             if self.health_point >= self.health:
@@ -58,7 +58,6 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
     def activate(self, state):
         self._type = Building.ACTIVE
         self._ei_type = self._default_ei_type
-        # state.path_manager.remove_consumer(self)
         state.path_manager.add_building(self)
         self.select_frame()
 
@@ -95,8 +94,8 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 
     def select_frame(self):
         self.image = self.frameset[self._type][self._ui_type].image
-        self.rect = self.frameset[self.type][self.ui_type].rect
-        self.mask = self.frameset[self.type][self.ui_type].mask
+        self.rect = self.frameset[self._type][self._ui_type].rect
+        self.mask = self.frameset[self._type][self._ui_type].mask
 
     @property
     def ui_type(self):
@@ -110,9 +109,18 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
     def type(self):
         return self._type
 
-    def set_type(self, index):
+    @type.setter
+    def type(self, index):
         self._type = index
         self.select_frame()
+        if self._type == Building.DESTROY:
+            self.chargable = False
+
+    @property
+    def undamaged(self):
+        return (self.health == self.health_point or
+                self._type == Building.PLAN or
+                self._type == Building.DESTROY)
 
     def add_connection(self, building, con):
         self.building_con[building] = con

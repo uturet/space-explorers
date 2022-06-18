@@ -1,4 +1,5 @@
 from operator import gt
+from core.property import EnergyInteraction
 from game_objects.object_type import Building
 from user_interface import Node
 from game_objects.buildings import Transmitter, building_previews
@@ -15,12 +16,12 @@ class ControlBar(Node):
         super().__init__()
         self.info_provider = None
         self.req_btngroups = {
-            BuildingControlBar.controls.__name__: BuildingControlBar(),
+            BuildingBtnGroup.controls.__name__: BuildingBtnGroup(),
         }
         self.btngroups = {
-            TransmitterControlBar.controls.__name__: TransmitterControlBar(),
-            GeneratorControlBar.controls.__name__: GeneratorControlBar(),
-            LaserGunControlBar.controls.__name__: LaserGunControlBar(),
+            TransmitterBtnGroup.controls.__name__: TransmitterBtnGroup(),
+            GeneratorBtnGroup.controls.__name__: GeneratorBtnGroup(),
+            LaserGunBtnGroup.controls.__name__: LaserGunBtnGroup(),
         }
         self.cur_gtype = None
 
@@ -202,7 +203,7 @@ class ToggleGroupsManager:
         return Frame(image, rect)
 
 
-class BuildingControlBar(ToggleGroupsManager):
+class BuildingBtnGroup(ToggleGroupsManager):
     controls = Building
     building = None
 
@@ -214,6 +215,7 @@ class BuildingControlBar(ToggleGroupsManager):
 
     def set_building(self, building):
         self.building = building
+        self.selected[0] = int(building._type != Building.DESTROY)
 
     def create_controlbar(self):
         self.create_group(
@@ -221,18 +223,23 @@ class BuildingControlBar(ToggleGroupsManager):
             self.handler_dgroup, Config.red_500)
 
     def destroy(self, state, event):
-        self.building._type = Building.DESTROY
+        if self.building.type != Building.DESTROY:
+            self.building.type = Building.DESTROY
+            self.building.ei_type = EnergyInteraction.CONSUMER
+            state.path_manager.remove_producer(self.building)
 
 
-class TransmitterControlBar(ToggleGroupsManager):
+class TransmitterBtnGroup(ToggleGroupsManager):
     controls = Transmitter
-    building = None
 
     def set_building(self, building):
         pass
 
+    def set_buildings(self, building):
+        pass
 
-class GeneratorControlBar(ToggleGroupsManager):
+
+class GeneratorBtnGroup(ToggleGroupsManager):
     controls = Generator
     building = None
     buildings = None
@@ -302,7 +309,7 @@ class GeneratorControlBar(ToggleGroupsManager):
                 b._es_type = Generator.DIRECT
 
 
-class LaserGunControlBar(ToggleGroupsManager):
+class LaserGunBtnGroup(ToggleGroupsManager):
     controls = LaserGun
     building = None
 

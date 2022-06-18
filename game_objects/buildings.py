@@ -82,6 +82,10 @@ class Generator(Building, Battery, EnergySpreader):
                 len(state.path_manager.paths[self])):
             priority = [([], []), ([], []), ([], [])]
             for consumer, path in state.path_manager.paths[self].items():
+                if (consumer._type == Building.PLAN or
+                        consumer._type == Building.DESTROY):
+                    priority[self.BUILD][0].append(consumer)
+                    priority[self.BUILD][1].append(path)
                 if consumer.chargable:
                     if (consumer.undamaged and
                             consumer.full):
@@ -89,10 +93,6 @@ class Generator(Building, Battery, EnergySpreader):
                 else:
                     if consumer.undamaged:
                         continue
-
-                if consumer._type == Building.PLAN:
-                    priority[self.BUILD][0].append(consumer)
-                    priority[self.BUILD][1].append(path)
                 if consumer.chargable and not consumer.full:
                     priority[self.CHARGE][0].append(consumer)
                     priority[self.CHARGE][1].append(path)
@@ -174,18 +174,6 @@ class LaserGun(Building, Battery, Gun):
         self.light_beem = LightBeem((
             self.rect.right+2, self.rect.centery
         ))
-
-    def receie_energy(self, state, charge):
-        if self.health_point == self.health:
-            self.charge += charge
-            if self.charge >= self.capacity:
-                self.charge = self.capacity
-        else:
-            self.health_point += charge
-            if self.health_point >= self.health:
-                self.health_point = self.health
-                if self._type == Building.PLAN:
-                    self.activate(state)
 
     def activate(self, state):
         self._type = Building.ACTIVE
