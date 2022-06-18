@@ -200,14 +200,13 @@ class LaserGun(Building, Battery, Gun):
         if self._type == Building.PLAN:
             return
         if self.charge == self.capacity:
-            self.fire = True
-        if self.charge:
+            self.light_beem.fire = True
+        if self.fire and self.charge:
             e = state.seconds * self.power
-            if e < self.charge and self.fire:
+            if e < self.charge:
                 self.charge -= e
                 self.light_beem.fire = True
             else:
-                self.fire = False
                 self.light_beem.fire = False
         else:
             self.light_beem.fire = False

@@ -2,7 +2,7 @@ from game_objects.object_type import Building
 from user_interface import Node
 from game_objects.buildings import building_previews
 from core.config import Config
-from game_objects.buildings import Generator
+from game_objects.buildings import Generator, LaserGun
 import pygame
 from core import collision_handler as ch
 from collections import namedtuple
@@ -17,6 +17,7 @@ class InfoBar(Node):
         self.info_provider = None
         self.btngroups = [
             GeneratorControlBar(),
+            LaserGunControlBar(),
         ]
         self.cur_btngroup = None
 
@@ -28,16 +29,17 @@ class InfoBar(Node):
                 self.cur_btngroup = btngroup
                 break
         sprite.set_ui_type(Building.SELECTED)
-        building_previews[sprite.__class__.__name__].draw_option_image(
-            (self.height/2, self.height/2), self.image)
 
     def handle_mousebuttonup(self, state, event):
         if self.cur_btngroup:
-            event.pos = (event.pos[0] - self.rect.left,
-                         event.pos[1] - self.rect.top)
             self.cur_btngroup.handle_mousebuttonup(state, event)
 
     def draw(self):
+        self.image.fill((255, 255, 255, 0))
+        if self.cur_btngroup:
+            (building_previews[self.cur_btngroup.building.__class__.__name__]
+             .draw_option_image(
+                (self.height/2, self.height/2), self.image))
         if self.cur_btngroup:
             self.cur_btngroup.draw(self.image)
 
@@ -67,30 +69,6 @@ class ToggleGroupsManager:
                 else:
                     image.blit(button.default.image, button.default.rect)
 
-
-class GeneratorControlBar(ToggleGroupsManager):
-    controls = Generator
-
-    def __init__(self):
-        super().__init__()
-        self.building = None
-        self.pgroup = ('BUILD', 'CHARGE', 'HEAL')
-        self.handler_pgroup = (
-            self.set_p_build, self.set_p_charge, self.set_p_heal)
-        self.esgroup = ('BROADCAST', 'DIRECT')
-        self.handler_esgroup = (
-            self.set_es_broadcast, self.set_es_direct)
-        self.create_controlbar()
-
-    def set_building(self, building):
-        self.building = building
-        self.selected[0] = building._p_type
-        self.selected[1] = building._es_type
-
-    def create_controlbar(self):
-        self.create_group((100, 40), self.pgroup, self.handler_pgroup)
-        self.create_group((260, 40), self.esgroup, self.handler_esgroup)
-
     def create_group(self, start_pos, titles, handlers):
         font = pygame.font.SysFont(pygame.font.get_default_font(), 20)
         group = []
@@ -117,22 +95,62 @@ class GeneratorControlBar(ToggleGroupsManager):
         image = image.convert_alpha()
         return Frame(image, rect)
 
+
+class GeneratorControlBar(ToggleGroupsManager):
+    controls = Generator
+
+    def __init__(self):
+        super().__init__()
+        self.building = None
+        self.pgroup = ('BUILD', 'CHARGE', 'HEAL')
+        self.handler_pgroup = (
+            self.set_p_build, self.set_p_charge, self.set_p_heal)
+        self.esgroup = ('BROADCAST', 'DIRECT')
+        self.handler_esgroup = (
+            self.set_es_broadcast, self.set_es_direct)
+        self.create_controlbar()
+
+    def set_building(self, building):
+        self.building = building
+        self.selected[0] = building._p_type
+        self.selected[1] = building._es_type
+
+    def create_controlbar(self):
+        self.create_group((100, 40), self.pgroup, self.handler_pgroup)
+        self.create_group((260, 40), self.esgroup, self.handler_esgroup)
+
     def set_p_build(self, state, event):
-        if self.building:
-            self.building._p_type = Generator.BUILD
+        self.building._p_type = Generator.BUILD
 
     def set_p_charge(self, state, event):
-        if self.building:
-            self.building._p_type = Generator.CHARGE
+        self.building._p_type = Generator.CHARGE
 
     def set_p_heal(self, state, event):
-        if self.building:
-            self.building._p_type = Generator.HEAL
+        self.building._p_type = Generator.HEAL
 
     def set_es_broadcast(self, state, event):
-        if self.building:
-            self.building._es_type = Generator.BROADCAST
+        self.building._es_type = Generator.BROADCAST
 
     def set_es_direct(self, state, event):
-        if self.building:
-            self.building._es_type = Generator.DIRECT
+        self.building._es_type = Generator.DIRECT
+
+
+class LaserGunControlBar(ToggleGroupsManager):
+    controls = LaserGun
+
+    def __init__(self):
+        super().__init__()
+        self.building = None
+        self.fgroup = ('HOLD', 'FIRE')
+        self.handler_fgroup = (self.set_fire, self.set_fire)
+        self.create_controlbar()
+
+    def set_building(self, building):
+        self.building = building
+        self.selected[0] = int(building.fire)
+
+    def create_controlbar(self):
+        self.create_group((100, 40), self.fgroup, self.handler_fgroup)
+
+    def set_fire(self, state, event):
+        self.building.fire = not self.building.fire
