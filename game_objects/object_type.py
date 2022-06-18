@@ -24,6 +24,7 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 
     PLAN = 0
     ACTIVE = 1
+    DESTROY = 2
     _type = PLAN
 
     _default_ei_type = EnergyInteraction.LATENT
@@ -40,11 +41,14 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
         self.select_frame()
 
     def receie_energy(self, state, charge):
-        self.health_point += charge
-        if self.health_point >= self.health:
-            self.health_point = self.health
-            if self._type == Building.PLAN:
-                self.activate(state)
+        if self._type == Building.DESTROY:
+            self.receive_damage(state, charge)
+        else:
+            self.health_point += charge
+            if self.health_point >= self.health:
+                self.health_point = self.health
+                if self._type == Building.PLAN:
+                    self.activate(state)
 
     def receive_damage(self, state, damage):
         self.health_point -= damage
@@ -90,7 +94,7 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
             Frame(converted, rect, pygame.mask.from_surface(converted)))
 
     def select_frame(self):
-        self.image = self.frameset[self.type][self.ui_type].image
+        self.image = self.frameset[self._type][self._ui_type].image
         self.rect = self.frameset[self.type][self.ui_type].rect
         self.mask = self.frameset[self.type][self.ui_type].mask
 

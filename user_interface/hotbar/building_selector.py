@@ -59,6 +59,7 @@ class Selectbar(Node):
         if event.button == 1:
             if (state.hotbar not in state.mouse_intersected):
                 if (self.selected_option and
+                    self.selected_option.preview.valid and
                         state.minimap not in state.mouse_intersected):
                     state.create_selected_building(
                         self.selected_option.preview)
