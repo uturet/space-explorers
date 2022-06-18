@@ -6,6 +6,8 @@ from game_objects.buildings import Generator, LaserGun
 import pygame
 from core import collision_handler as ch
 from collections import namedtuple
+import math
+import random
 
 
 class InfoBar(Node):
@@ -42,6 +44,85 @@ class InfoBar(Node):
                 (self.height/2, self.height/2), self.image))
         if self.cur_btngroup:
             self.cur_btngroup.draw(self.image)
+
+
+class MultiInfoBar(Node):
+    width = Config.hotbarwidth
+    height = Config.hotbarheight
+    group_height = 40
+
+    def __init__(self):
+        super().__init__()
+        self.btngroups = [
+            GeneratorControlBar(),
+            LaserGunControlBar(),
+        ]
+        self.groups = [[] for i in range(len(self.btngroups))]
+        self.groups_images = []
+        self.cur_btngroup = 0
+        self.groups_image = pygame.Surface(
+            (self.height+15, self.group_height*len(building_previews)), pygame.SRCALPHA)
+        self.groups_rect = self.groups_image.get_rect()
+        self.create_groups_images()
+
+    def set_info_providers(self, sprites):
+        self.cur_btngroup = 0
+        self.groups = [[] for i in range(len(self.btngroups))]
+        for spr in sprites:
+            for index, btngroup in enumerate(self.btngroups):
+                if isinstance(spr, btngroup.controls):
+                    self.groups[index].append(spr)
+                    break
+
+    def create_groups_images(self):
+        size = 14
+        cross = pygame.Surface((size, size), pygame.SRCALPHA)
+        pygame.draw.line(cross, (255, 255, 255), (0, 0), (size, size), 4)
+        pygame.draw.line(cross, (255, 255, 255), (-1, size), (size, -1), 4)
+
+        for index, preview in enumerate(building_previews.values()):
+            self.groups_images.append([])
+            for active in (False, True):
+                image = pygame.Surface(
+                    (self.groups_rect.width, 40), pygame.SRCALPHA)
+                rect = image.get_rect()
+                preview.draw_small_option_image(
+                    (rect.height/2, rect.height/2), image)
+                if active:
+                    pygame.draw.rect(image, (255, 255, 255),
+                                     (0, 0, rect.width, rect.height), 2)
+                image.blit(cross, (45, 13))
+                self.groups_images[index].append(Frame(image, rect))
+
+    def handle_mousebuttonup(self, state, event):
+        if event.button == 1:
+            if event.pos[0] <= self.groups_rect.width:
+                index = int(
+                    (event.pos[1]-self.groups_rect.top)/self.group_height)
+                if 0 <= index <= len(self.groups_images):
+                    self.cur_btngroup = index
+            else:
+                event.pos = (event.pos[0]-self.groups_rect.width, event.pos[1])
+
+    def handle_mousewheel(self, state, event):
+        self.groups_rect.center = (
+            self.groups_rect.centerx,
+            self.groups_rect.centery +
+            ((event.x+event.y) * self.group_height))
+
+    def draw(self):
+        self.image.fill((255, 255, 255, 0))
+        self.groups_image.fill((255, 255, 255, 0))
+        font = pygame.font.SysFont(pygame.font.get_default_font(), 35)
+        for index, group in enumerate(self.groups_images):
+            text = font.render(
+                f'{random.randint(0, 1000)}', False, (255, 255, 255))
+            if index == self.cur_btngroup:
+                self.groups_image.blit(group[1].image, (0, index*40))
+            else:
+                self.groups_image.blit(group[0].image, (0, index*40))
+            self.groups_image.blit(text, (70, (index*40)+9))
+        self.image.blit(self.groups_image, self.groups_rect.topleft)
 
 
 Button = namedtuple('Button', 'default active handler')

@@ -128,7 +128,7 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
 class Preview(ABC, ColorFrameList):
     building = None
     valid = True
-    option_radius = 40
+    option_radius = 30
     small_option_radius = option_radius/2
 
     preview_color = Config.black
