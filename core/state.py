@@ -182,6 +182,7 @@ class State:
             for building, con in obj.building_con.items():
                 building.remove_connection(obj)
                 self.grid.remove_item(con)
+                self.path_manager.remove_path_with_con(con)
                 con.kill()
         obj.kill()
 

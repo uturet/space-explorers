@@ -226,7 +226,7 @@ class BuildingBtnGroup(ToggleGroupsManager):
         if self.building.type != Building.DESTROY:
             self.building.type = Building.DESTROY
             self.building.ei_type = EnergyInteraction.CONSUMER
-            state.path_manager.remove_producer(self.building)
+            # state.path_manager.remove_producer(self.building)
 
 
 class TransmitterBtnGroup(ToggleGroupsManager):

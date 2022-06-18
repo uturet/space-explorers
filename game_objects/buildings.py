@@ -78,7 +78,7 @@ class Generator(Building, Battery, EnergySpreader):
         e = round(state.seconds * self.production, 4)
         self.charge = min(self.capacity, self.charge + e)
 
-        if (self in state.path_manager.paths and
+        if (self._type != Building.DESTROY and self in state.path_manager.paths and
                 len(state.path_manager.paths[self])):
             priority = [([], []), ([], []), ([], [])]
             for consumer, path in state.path_manager.paths[self].items():
@@ -164,8 +164,6 @@ class LaserGun(Building, Battery, Gun):
     chargable = True
 
     power = 50
-
-    fire = True
 
     _default_ei_type = EnergyInteraction.CONSUMER
 

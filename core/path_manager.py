@@ -11,7 +11,7 @@ class PathManager:
     def __init__(self):
         self.consumers = set()
         self.producers = set()
-        self.paths = {}  # {consumer: {producer: [[connection], [connection]]}}
+        self.paths = {}  # {producer: {consumer: [[connection], [connection]]}}
         self.astart = AStar()
 
     def get_path(self, producer, consumer):
@@ -29,6 +29,14 @@ class PathManager:
         self.remove_consumer(building)
         if building in self.producers:
             self.remove_producer(building)
+
+    def remove_path_with_con(self, con):
+        for producer in self.producers:
+            for consumer in self.consumers:
+                if (consumer in self.paths[producer] and
+                        con in self.paths[producer][consumer]):
+                    del self.paths[producer][consumer]
+                    self.find_path(producer, consumer)
 
     def add_consumer(self, consumer):
         if consumer not in self.consumers:
