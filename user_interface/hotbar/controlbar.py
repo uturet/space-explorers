@@ -13,15 +13,15 @@ class ControlBar(Node):
         super().__init__(parent)
         self.rect.left = shift
 
-        self.destroy_button = Button(
-            self, parent.mod_index, color=Config.red_500,
-            on_mouseup=self.handle_destroy_provider)
-        self.destroy_button.rect.topleft = (200, 0)
-        self.mods = [
-            GeneratorControlBar(self, parent.mod_index)
-        ]
+        # self.destroy_button = Button(
+        #     self, parent.mod_index, color=Config.red_500,
+        #     on_mouseup=self.handle_destroy_provider)
+        # self.destroy_button.rect.topleft = (200, 0)
+        # self.mods = [
+        #     GeneratorControlBar(self, parent.mod_index)
+        # ]
 
-        self.cur_mod = None
+        # self.cur_mod = None
 
     def draw_controlbar(self):
         self.image.blit(

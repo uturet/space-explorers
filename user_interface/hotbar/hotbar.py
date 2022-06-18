@@ -19,32 +19,37 @@ class Hotbar(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.groups)
         self.image = pygame.Surface(
             (Config.hotbarwidth, Config.hotbarheight))
+
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (
             round(Config.width / 2) - round(Config.hotbarwidth/2),
             Config.height
         )
-        self.selectbar = ui.hotbar.Selectbar(self)
-        self.infobar = ui.hotbar.InfoBar(self)
-        self.multi_infobar = ui.hotbar.MultiInfoBar(self)
+        self.selectbar = ui.hotbar.Selectbar()
+        self.infobar = ui.hotbar.InfoBar()
+        self.multi_infobar = ui.hotbar.MultiInfoBar()
         self.mods = (self.selectbar, self.infobar, self.multi_infobar)
         self.draw()
 
     def handle_hotbarselectmod(self, state, event):
         self.set_active_mod(self.SELECTMOD)
+        self.draw()
 
     def handle_hotbarinfomod(self, state, event):
         self.set_active_mod(self.INFOMOD)
         self.active_mod.set_info_provider(event.sprite)
+        self.draw()
 
     def handle_hotbarmultiinfomod(self, state, event):
         self.set_active_mod(self.MULTI_INFOMOD)
         self.active_mod.set_info_providers(event.sprites)
+        self.draw()
 
     def set_active_mod(self, mod_index):
         if mod_index in (
                 self.SELECTMOD, self.INFOMOD, self.MULTI_INFOMOD):
             self.active_mod_index = mod_index
+            self.draw()
 
     def handle_mousebuttondown(self, state, event):
         if (self in state.mouse_intersected and
@@ -75,9 +80,9 @@ class Hotbar(pygame.sprite.Sprite):
         return self.mods[self.active_mod_index]
 
     def update(self, state):
-        self.image.blit(self.active_mod.image, self.active_mod.rect.topleft)
         self.active_mod.update(state)
 
     def draw(self):
-        self.image.fill(Config.dark)
+        self.image.fill(Config.grey_700)
         self.active_mod.draw()
+        self.image.blit(self.active_mod.image, self.active_mod.rect.topleft)

@@ -12,8 +12,8 @@ class MultiInfoBar(Node):
     width = Config.hotbarwidth
     height = Config.hotbarheight
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self. info_providers = set()
         self._previews = set()
         self.infobar_preview = None
@@ -52,9 +52,9 @@ class MultiInfobarPreview(Node):
     height = MultiInfoBar.height
     color = Config.black
 
-    def __init__(self, parent, height):
+    def __init__(self, height):
         self.height = max(self.height, height)
-        super().__init__(parent)
+        super().__init__()
         self.image.fill(self.color)
 
 
