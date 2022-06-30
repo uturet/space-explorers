@@ -30,14 +30,6 @@ class PathManager:
         if building in self.producers:
             self.remove_producer(building)
 
-    def remove_path_with_con(self, con):
-        for producer in self.producers:
-            for consumer in self.consumers:
-                if (consumer in self.paths[producer] and
-                        con in self.paths[producer][consumer]):
-                    del self.paths[producer][consumer]
-                    self.find_path(producer, consumer)
-
     def add_consumer(self, consumer):
         if consumer not in self.consumers:
             self.consumers.add(consumer)
@@ -75,6 +67,11 @@ class PathManager:
         if path:
             self.paths[producer][consumer] = path
             self.astart.clear()
+        else:
+            try:
+                del self.paths[producer][consumer]
+            except KeyError:
+                pass
 
 
 VerticeWeight = namedtuple('VerticeWeight', 'g h f prev')

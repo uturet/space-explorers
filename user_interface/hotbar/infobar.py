@@ -6,7 +6,7 @@ from game_objects.buildings import Transmitter, building_previews
 from core.config import Config
 from game_objects.buildings import Generator, LaserGun
 import pygame
-from core import collision_handler as ch
+from core import helpers as ch
 from collections import namedtuple
 
 

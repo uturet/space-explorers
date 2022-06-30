@@ -1,6 +1,6 @@
 from user_interface import Node
 from game_objects.buildings import building_previews
-from core import collision_handler as ch
+from core import helpers as ch
 from core.config import Config
 from core.animation import ColorFrameList
 import itertools
@@ -50,6 +50,8 @@ class Selectbar(Node):
                 self.rect.center[0] +
                 ((event.x+event.y) * Config.scroll_speed),
                 self.rect.center[1])
+        elif self.selected_option:
+            self.selected_option.preview.handle_mousewheel(state, event)
 
     def handle_mousemotion(self, state, event):
         if self.selected_option:

@@ -1,7 +1,7 @@
 import pygame
 from abc import ABC, abstractmethod
 from core.config import Config
-from core import collision_handler as ch
+from core import helpers as ch
 from core.property import EnergyInteraction, Battery
 from core.animation import ColorFrameList, Frame
 
@@ -53,7 +53,11 @@ class Building(pygame.sprite.Sprite, EnergyInteraction, ColorFrameList):
     def receive_damage(self, state, damage):
         self.health_point -= damage
         if self.health_point <= 0:
+            self.close(state)
             state.remove_gameobj(self)
+
+    def close(self, state):
+        pass
 
     def activate(self, state):
         self._type = Building.ACTIVE
@@ -194,7 +198,16 @@ class Preview(ABC, ColorFrameList):
             self.select_frame(0)
         else:
             self.select_frame(1)
+        self.draw_image(state)
+
+    def draw_image(self, state):
         state.mouse.image.blit(self.image, self.center_point)
+
+    def handle_mousewheel(self, state, event):
+        pass
+
+    def create_building(self, pos):
+        return self.building(pos)
 
 
 class Particle(pygame.sprite.Sprite):

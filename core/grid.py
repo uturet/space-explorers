@@ -1,4 +1,4 @@
-from core import collision_handler as ch
+from core import helpers as ch
 from core.config import Config
 import pygame
 import math

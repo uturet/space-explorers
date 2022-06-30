@@ -7,7 +7,7 @@ from core.config import Config
 import user_interface as ui
 from game_objects.object_type import Building, Particle
 from core.event_manager import EventManager
-from core import collision_handler as ch
+from core import helpers as ch
 from core.grid import Grid
 from seeder import seed_buildings_rand
 from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
@@ -128,7 +128,6 @@ class State:
         pass
 
     def handle_mouseendselect(self, state, event):
-
         self.grid.rect_intersects(event.rect, self.mouse_select)
         for spr in self.mouse_select:
             spr.set_ui_type(Building.SELECTED)
@@ -182,12 +181,12 @@ class State:
             for building, con in obj.building_con.items():
                 building.remove_connection(obj)
                 self.grid.remove_item(con)
-                self.path_manager.remove_path_with_con(con)
                 con.kill()
+            self.path_manager.update_paths()
         obj.kill()
 
     def create_selected_building(self, preview):
-        new_building = preview.building(self.mouse.bg_rect.center)
+        new_building = preview.create_building(self.mouse.bg_rect.center)
         for building, con_prev in self.tmp_preview_group.items():
             con = con_prev.create_connection(self, new_building, building)
             new_building.add_connection(building, con)

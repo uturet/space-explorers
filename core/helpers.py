@@ -48,3 +48,19 @@ def rect_from_points(pos1, pos2):
         rect[1] = pos2[1]
         rect[3] = pos1[1] - rect[1]
     return pygame.Rect(rect)
+
+
+def get_line(pos1, pos2, angle, length):
+    h = math.hypot(pos1[0]-pos2[0], pos1[1]-pos2[1])
+    xb = (pos1[0]+(pos2[0]-pos1[0])*math.cos(angle) +
+          (pos2[1]-pos1[1])*math.sin(angle))
+    yb = (pos1[1]-(pos2[0]-pos1[0])*math.sin(angle) +
+          (pos2[1]-pos1[1])*math.cos(angle))
+    spos1 = (xb, yb)
+    if h == 0:
+        t1 = 0
+    else:
+        t1 = length/h
+    end = [((1-t1)*pos1[0]+t1*spos1[0]),
+           ((1-t1)*pos1[1]+t1*spos1[1])]
+    return end

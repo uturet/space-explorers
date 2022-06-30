@@ -3,8 +3,9 @@ from static.colors import MaterialColors
 
 
 class Config(MaterialColors):
-    width = 1920
+    width = 960
     height = 1010
+    # height = 1080
     minimapwidth = 200
     minimapheight = 200
     hotbarwidth = 500
@@ -38,7 +39,7 @@ class Config(MaterialColors):
 
     @classmethod
     def set_default_window_position(cls):
-        x = 2560
-        y = 1440 - 1080
+        x = 960
+        y = 0
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (2560 - cls.width, 0)
         os.environ['SDL_VIDEO_WINDOW_POS'] = f"{x},{y}"

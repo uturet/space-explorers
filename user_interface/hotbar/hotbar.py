@@ -1,6 +1,5 @@
 import user_interface as ui
 from core.config import Config
-from abc import ABC
 import pygame
 
 
@@ -23,7 +22,7 @@ class Hotbar(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = (
             round(Config.width / 2) - round(Config.hotbarwidth/2),
-            Config.height
+            Config.height - (Config.height * Config.move_area)
         )
         self.selectbar = ui.hotbar.Selectbar()
         self.infobar = ui.hotbar.InfoBar()
@@ -52,8 +51,7 @@ class Hotbar(pygame.sprite.Sprite):
             self.draw()
 
     def handle_mousebuttondown(self, state, event):
-        if (self in state.mouse_intersected and
-                hasattr(self.active_mod, 'handle_mousebuttondown')):
+        if hasattr(self.active_mod, 'handle_mousebuttondown'):
             event.pos = (event.pos[0] - self.rect.left,
                          event.pos[1] - self.rect.top)
             self.active_mod.handle_mousebuttondown(state, event)

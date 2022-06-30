@@ -1,7 +1,7 @@
 from core.config import Config
 import pygame
 from core.event import MOUSEPRESELECT, MOUSESELECT, MOUSEENDSELECT
-from core import collision_handler as ch
+from core import helpers as ch
 
 
 class Mouse(pygame.sprite.Sprite):
@@ -60,9 +60,9 @@ class Mouse(pygame.sprite.Sprite):
     def handle_mousebuttondown(self, state, event):
         if event.button != 1:
             return
-        if self.active_mod == self.INACTIVE and \
-            state.minimap not in state.mouse_intersected and \
-                state.hotbar not in state.mouse_intersected:
+        if (self.active_mod == self.INACTIVE and
+            state.minimap not in state.mouse_intersected and
+                state.hotbar not in state.mouse_intersected):
             self.set_mod(self.SELECT)
             self.select_point = state.bg.abs_pos_to_bg(
                 event.pos[0], event.pos[1])
@@ -77,8 +77,8 @@ class Mouse(pygame.sprite.Sprite):
             bg_rect = ch.rect_from_points(
                 self.select_point, state.bg.abs_pos_to_bg(*event.pos))
             if bg_rect.width == 0 and bg_rect.height == 0:
-                bg_rect.width = 4
-                bg_rect.height = 4
+                bg_rect.width = 10
+                bg_rect.height = 7
                 bg_rect.center = state.bg.abs_pos_to_bg(*event.pos)
             pygame.event.post(pygame.event.Event(
                 MOUSEENDSELECT, {'rect': bg_rect}))
