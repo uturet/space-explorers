@@ -87,7 +87,6 @@ class State:
             self.congroup,
             self.partgroup,
         )
-        self.grid.draw_grid(self.screen)
 
         self.draw_group(self.congroup)
 
