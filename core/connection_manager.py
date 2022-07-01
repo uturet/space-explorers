@@ -1,7 +1,7 @@
-import pygame
-from core.config import Config
-import math
 from core.animation import Frame
+from core.config import Config
+import pygame
+import math
 
 
 class ConnectionPreview(pygame.sprite.Sprite):

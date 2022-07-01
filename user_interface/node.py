@@ -1,6 +1,6 @@
-import pygame
 from collections import namedtuple
 from core.config import Config
+import pygame
 
 Coords = namedtuple('Coords', 'left top right bottom')
 

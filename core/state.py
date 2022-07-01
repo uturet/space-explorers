@@ -9,7 +9,7 @@ from game_objects.object_type import Building, Particle
 from core.event_manager import EventManager
 from core import helpers as ch
 from core.grid import Grid
-from seeder import seed_buildings_rand
+from core.seeder import seed_buildings_rand
 from core.event import HOTBARINFOMOD, HOTBARMULTIINFOMOD, HIGLIGHT
 from game_objects.buildings import (
     building_previews, TransmitterPreview, GeneratorPreview, LaserGunPreview)
@@ -29,8 +29,7 @@ class State:
         self.congroup = set()
         self.partgroup = set()
 
-        # self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.screen = pygame.display.set_mode((Config.width, Config.height))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.set_group_attachmet()
 
         self.event_manager = EventManager(self)

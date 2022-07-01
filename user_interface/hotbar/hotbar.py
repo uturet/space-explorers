@@ -1,5 +1,5 @@
-import user_interface as ui
 from core.config import Config
+import user_interface as ui
 import pygame
 
 

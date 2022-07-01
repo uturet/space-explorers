@@ -30,7 +30,7 @@ def rect_collides(rect, sprites, collisions):
 
 
 def circle_intersects_circle(pos_1, radius_1, pos_2, radius_2):
-    return (math.hypot(pos_1[0] - pos_2[0], pos_1[1] - pos_2[1])) - (radius_1 + radius_2) < COLLISION_TOLERANCE
+    return (math.hypot(pos_1[0]-pos_2[0], pos_1[1]-pos_2[1]))-(radius_1+radius_2) < COLLISION_TOLERANCE
 
 
 def rect_from_points(pos1, pos2):

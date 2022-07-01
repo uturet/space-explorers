@@ -1,8 +1,8 @@
-from user_interface import Node
 from game_objects.buildings import building_previews
-from core import helpers as ch
-from core.config import Config
 from core.animation import ColorFrameList
+from user_interface import Node
+from core.config import Config
+from core import helpers as ch
 import itertools
 import pygame
 

@@ -1,9 +1,8 @@
 
 from game_objects.object_type import Building
-from core.config import Config
-import math
-from collections import namedtuple
 from core.property import EnergyInteraction
+from collections import namedtuple
+import math
 
 
 class PathManager:

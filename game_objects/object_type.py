@@ -1,7 +1,6 @@
 import pygame
 from abc import ABC, abstractmethod
 from core.config import Config
-from core import helpers as ch
 from core.property import EnergyInteraction, Battery
 from core.animation import ColorFrameList, Frame
 

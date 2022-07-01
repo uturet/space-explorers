@@ -1,13 +1,12 @@
-from operator import gt
-from core.property import EnergyInteraction
-from game_objects.object_type import Building
-from user_interface import Node
 from game_objects.buildings import Transmitter, building_previews
-from core.config import Config
 from game_objects.buildings import Generator, LaserGun
-import pygame
-from core import helpers as ch
+from game_objects.object_type import Building
+from core.property import EnergyInteraction
 from collections import namedtuple
+from user_interface import Node
+from core.config import Config
+from core import helpers as ch
+import pygame
 
 
 class ControlBar(Node):

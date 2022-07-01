@@ -1,7 +1,7 @@
+from core.event import MOUSEPRESELECT, MOUSEENDSELECT
 from core.config import Config
-import pygame
-from core.event import MOUSEPRESELECT, MOUSESELECT, MOUSEENDSELECT
 from core import helpers as ch
+import pygame
 
 
 class Mouse(pygame.sprite.Sprite):

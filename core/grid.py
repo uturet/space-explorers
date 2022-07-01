@@ -76,9 +76,11 @@ class Grid:
                     if rect.colliderect(item.rect):
                         if isinstance(item, Building):
                             buildgroup.add(item)
-                        elif (isinstance(congroup, set) and isinstance(item, Connection)):
+                        elif (isinstance(congroup, set) and
+                              isinstance(item, Connection)):
                             congroup.add(item)
-                        elif (isinstance(partgroup, set) and isinstance(item, Particle)):
+                        elif (isinstance(partgroup, set) and
+                              isinstance(item, Particle)):
                             partgroup.add(item)
 
     def _chunk(self, pos):

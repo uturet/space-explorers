@@ -1,5 +1,5 @@
-import pygame
 from core.config import Config
+import pygame
 
 
 class InfoManager:

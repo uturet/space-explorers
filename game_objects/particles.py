@@ -9,8 +9,8 @@ from core import helpers as ch
 
 class LightBeem(Particle):
     light_density = 2
-    damage = 10
-    distance = light_density * damage * 10 * 5
+    damage = 50
+    distance = light_density * damage * 10
     fire = False
 
     def __init__(self, pos, angle):
@@ -44,9 +44,12 @@ class LightBeem(Particle):
                 if collision is None:
                     collision = col
                     collided_spr = spr
-                elif (math.hypot(
-                        (self.distance//2)-collision[0], (self.distance//2)-collision[1]) >
-                        math.hypot((self.distance//2)-col[0], (self.distance//2)-col[1])):
+                elif (math.hypot((
+                    self.distance//2)-collision[0],
+                    (self.distance//2)-collision[1]) >
+                    math.hypot((
+                        self.distance//2)-col[0],
+                        (self.distance//2)-col[1])):
                     collision = col
                     collided_spr = spr
 

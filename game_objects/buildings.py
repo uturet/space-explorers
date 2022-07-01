@@ -5,7 +5,6 @@ from core.property import (
     EnergySpreader, Battery, EnergyInteraction, Gun)
 from core import helpers as ch
 import math
-
 from game_objects.particles import LightBeem
 
 THROUGHPUT = 100
@@ -78,7 +77,8 @@ class Generator(Building, Battery, EnergySpreader):
         e = round(state.seconds * self.production, 4)
         self.charge = min(self.capacity, self.charge + e)
 
-        if (self._type != Building.DESTROY and self in state.path_manager.paths and
+        if (self._type != Building.DESTROY and
+            self in state.path_manager.paths and
                 len(state.path_manager.paths[self])):
             priority = [([], []), ([], []), ([], [])]
             for consumer, path in state.path_manager.paths[self].items():
@@ -163,7 +163,7 @@ class LaserGun(Building, Battery, Gun):
     charge = 0
     chargable = True
 
-    power = 10
+    power = 50
 
     _default_ei_type = EnergyInteraction.CONSUMER
 
